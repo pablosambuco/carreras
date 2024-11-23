@@ -1,14 +1,128 @@
 import sys
 import time
 import curses
+import random
+
+
+class Card:
+    def __init__(self, suit, value):
+        self.suit = suit
+        self.value = value
+
+    def __eq__(self, other):
+        return self.suit == other.suit and self.value == other.value
+
+    def __str__(self):
+        return f"{self.value} of {self.suit}"
+
+    def __repr__(self):
+        return f"{self.value} of {self.suit}"
+
+    def match_suit(self, suit):
+        return self.suit == suit
+
+
+class Deck:
+    def __init__(self, suits, q, shuffled=False):
+        self.suits = suits
+        self.cards = [Card(s, v) for v in range(1, q + 1) for s in suits]
+        if shuffled:
+            self.shuffle()
+
+    def shuffle(self):
+        random.shuffle(self.cards)
+
+    def get_card(self, suit=None, value=None):
+        if not suit or not value:
+            return self.cards.pop()
+        aux = Card(suit, value)
+        if aux in self.cards:
+            self.cards.remove(aux)
+            return aux
+        return None
+
+    def insert_card(self, card):
+        if card not in self.cards:
+            self.cards.append(card)
 
 
 class Game:
-    def __init__(self, length):
-        self.length = length
+    def __init__(self, board):
+        self.deck = Deck(["golds", "cups", "swords", "clubs"], 12, shuffled=True)
+        self.board = board
+        self.length = board.get_game_length()
+        self.horses = {
+            n + 1: {"card": self.deck.get_card(suit, 11), "row": 0}
+            for n, suit in enumerate(self.deck.suits)
+        }
+        self.steps = {
+            i + 1: {"card": self.deck.get_card(), "hidden": True, "pending": False}
+            for i in range(self.length)
+        }
+        self.min_row = 0
+        self.top_card = None
+
+    def draw_game(self):
+        self.board.clear()
+        box = self.board.draw_box(
+            (self.length + 2) * Board.CARD_HEIGHT + 2,
+            5 * (Board.CARD_WIDTH + 1) - 2,
+            color_pair=5,
+        )
+        finish_y, finish_x = box.screen.getmaxyx()
+        finish = box.draw_box(
+            Board.CARD_HEIGHT,
+            finish_x - Board.CARD_WIDTH - 2,
+            finish_y - Board.CARD_HEIGHT - 1,
+            Board.CARD_WIDTH + 1,
+            4,
+        )
+        finish.message(f"{'FINISH':^{Board.CARD_WIDTH*4-2}}")
+
+        if self.top_card is None:
+            box.draw_card(0, 0, "░░░░")
+        else:
+            box.draw_card(0, 0, self.top_card.value, self.top_card.suit)
+        for n, step in self.steps.items():
+            if step["hidden"]:
+                box.draw_card(0, n, "░░░░")
+            else:
+                box.draw_card(0, n, step["card"].value, step["card"].suit)
+        for n, horse in self.horses.items():
+            box.draw_card(n, horse["row"], horse["card"].value, horse["card"].suit)
+        self.board.read_key()
+
+    def print_status(self):
+        print(self.horses)
+        print(self.steps)
+
+    def move_horses(self, suit, step):
+        for horse in self.horses.values():
+            if horse["card"].match_suit(suit):
+                horse["row"] += step
+        self.min_row = min([horse["row"] for horse in self.horses.values()])
+
+    def step(self):
+        if self.min_row and self.steps[self.min_row]["pending"]:
+            self.steps[self.min_row]["pending"] = False
+            card = self.steps[self.min_row]["card"]
+            self.move_horses(card.suit, -1)
+            self.top_card = self.deck.get_card()
+        else:
+            if self.top_card:
+                card = self.top_card
+                self.move_horses(card.suit, +1)
+                self.top_card = None
+            if self.min_row and self.steps[self.min_row]["hidden"]:
+                self.steps[self.min_row]["hidden"] = False
+                self.steps[self.min_row]["pending"] = True
+            else:
+                self.top_card = self.deck.get_card()
+
+        return any([horse["row"] > self.length for horse in self.horses.values()])
 
 
-class Screen:
+class Board:
 
     CARD_WIDTH = 6
     CARD_HEIGHT = 3
@@ -37,7 +151,7 @@ class Screen:
             while key == -1:
                 key = self.screen.getch()
                 time.sleep(0.1)
-            if key in Screen.EXIT_KEYS:
+            if key in Board.EXIT_KEYS:
                 sys.exit()
             if not return_list:
                 return
@@ -49,17 +163,27 @@ class Screen:
         self.refresh()
         self.y_pos += 1
 
-    def addchr(self, y, x, c):
+    def add_char(self, y, x, c):
         self.screen.addch(self.y_pos + y, self.x_pos + x, c)
 
-    def addstr(self, y, x, s):
+    def add_string(self, y, x, s):
         self.screen.addstr(self.y_pos + y, self.x_pos + x, s)
 
-    def box(self, length, width, color_pair):
-        n = length * Screen.CARD_HEIGHT + 2
-        m = width * (Screen.CARD_WIDTH + 1) - 2
+    def get_game_length(self):
+        self.screen.bkgd(" ")
+        self.message("Presiona Q en cualquier momento para salir del juego")
+        self.message("Presiona 4, 5, 6 o 7 para definir el largo de la carrera")
+        return self.read_key(Board.ALLOWED_VALUES)
 
-        window = Screen(self.screen.subwin(n, m, self.y_pos, self.x_pos), self)
+    def draw_box(self, length, width, y=None, x=None, color_pair=None):
+        if not y:
+            y = self.y_pos
+        if not x:
+            x = self.x_pos
+        if not color_pair:
+            color_pair = 0
+
+        window = Board(self.screen.subwin(length, width, y, x), self)
         window.screen.attrset(curses.color_pair(color_pair))
         window.screen.box()
         window.screen.attrset(curses.color_pair(0))
@@ -68,8 +192,7 @@ class Screen:
         window.refresh()
         return window
 
-    def card(self, x, y, value, suit=None):
-
+    def draw_card(self, x, y, value, suit=None):
         suits = {
             "golds": {"symbol": "🪙", "color": curses.color_pair(1)},
             "cups": {"symbol": "🍷", "color": curses.color_pair(2)},
@@ -82,10 +205,10 @@ class Screen:
             12: "👑",
         }
 
-        width = Screen.CARD_WIDTH
-        height = Screen.CARD_HEIGHT
-        card = Screen(
-            self.screen.subwin(height, width, y * height + 3, x * width + 1), self
+        width = Board.CARD_WIDTH
+        height = Board.CARD_HEIGHT
+        card = Board(
+            self.screen.subwin(height, width, y * height + 1, x * width + 1), self
         )
         card.screen.box()
         card.x_pos = 1
@@ -100,7 +223,7 @@ class Screen:
         return card
 
     def move_card(self, x, y):
-        self.screen.mvwin(y * Screen.CARD_HEIGHT + 3, x * Screen.CARD_WIDTH + 1)
+        self.screen.mvwin(y * Board.CARD_HEIGHT + 3, x * Board.CARD_WIDTH + 1)
         self.refresh()
 
 
@@ -114,27 +237,13 @@ def main(stdscr):
     curses.init_pair(4, curses.COLOR_GREEN, 0)
     curses.init_pair(5, curses.COLOR_BLUE, 0)
 
-    screen = Screen(stdscr)
-    screen.screen.bkgd(" ")
-    # screen.clear()
-    screen.message("Presiona Q en cualquier momento para salir del juego")
-    screen.message("Presiona 4, 5, 6 o 7 para definir el largo de la carrera")
-    length = screen.read_key(Screen.ALLOWED_VALUES)
-    game = Game(length)
-    window = screen.box(length, 5, 5)
-    for i in range(length):
-        window.card(0, i, "░░░░")
-    h1 = window.card(1, 0, 11, "golds")
-    h2 = window.card(2, 0, 11, "cups")
-    h3 = window.card(3, 0, 11, "swords")
-    h4 = window.card(4, 0, 11, "clubs")
-    key = screen.read_key()
-    h1.move_card(1, 1)
-    key = screen.read_key()
-    h1.move_card(1, 2)
-    key = screen.read_key()
-    h1.move_card(1, 3)
-    key = screen.read_key()
+    board = Board(stdscr)
+    game = Game(board)
+    game.draw_game()
+    game_ended = False
+    while not game_ended:
+        game_ended = game.step()
+        game.draw_game()
 
 
 if __name__ == "__main__":
