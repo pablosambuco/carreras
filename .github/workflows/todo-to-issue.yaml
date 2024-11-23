@@ -9,6 +9,8 @@ jobs:
         uses: "alstr/todo-to-issue-action@v5"
         with:
           INSERT_ISSUE_URLS: "true"
+          PROJECT: "user/pablosambuco/carreras"
+          PROJECTS_SECRET: "${{ secrets.PROJECTS_SECRET }}"
       - name: Set Git user
         run: |
           git config --global user.name "github-actions[bot]"
