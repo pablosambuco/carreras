@@ -369,8 +369,10 @@ class Game:
         """
         Draws the game board.
         """
-        # TODO: Move to Board.
+        # TODO: Move this method to another place
         #  Game should be agnostic of the final representation
+        #  labels: enhancement
+        #  assignees: pablosambuco
         self.board.clear()
         box = self.board.draw_box(
             (self.length + 2) * Board.CARD_HEIGHT + 2,
