@@ -135,6 +135,87 @@ class Deck:
             self.cards.append(card)
 
 
+class Game:
+    """
+    Represents a races game.
+
+    Attributes:
+        deck (Deck): The deck of cards used in the game.
+        board (Board): The game board.
+        length (int): The length of the game.
+        knights (dict): The knights in the game.
+        steps (dict): The steps in the game.
+        min_row (int): The minimum row value among the knights.
+        top_card (Card): The top card in the deck.
+    """
+
+    def __init__(self, lenght):
+        """
+        Initializes a Game object.
+
+        Args:
+            board (Board): The game board.
+        """
+        self.deck = Deck(["golds", "cups", "swords", "clubs"], 12, shuffled=True)
+        # self.board = board
+        self.length = lenght
+        self.knights = {
+            n + 1: {"card": self.deck.get_card(suit, 11), "row": 0}
+            for n, suit in enumerate(self.deck.suits)
+        }
+        self.steps = {
+            i + 1: {"card": self.deck.get_card(), "hidden": True, "pending": False}
+            for i in range(self.length)
+        }
+        self.min_row = 0
+        self.top_card = None
+
+    def print_status(self):
+        """
+        Prints the current status of the game.
+        """
+        print(self.knights)
+        print(self.steps)
+
+    def move_knights(self, suit: str, step: int):
+        """
+        Moves the knights based on the suit and step value.
+
+        Args:
+            suit (str): The suit of the card.
+            step (int): The step value.
+        """
+        for knight in self.knights.values():
+            if knight["card"].match_suit(suit):
+                knight["row"] += step
+        self.min_row = min([knight["row"] for knight in self.knights.values()])
+
+    def step(self) -> bool:
+        """
+        Executes a step in the game.
+
+        Returns:
+            bool: True if the game has ended, False otherwise.
+        """
+        if self.min_row and self.steps[self.min_row]["pending"]:
+            self.steps[self.min_row]["pending"] = False
+            card = self.steps[self.min_row]["card"]
+            self.move_knights(card.suit, -1)
+            self.top_card = self.deck.get_card()
+        else:
+            if self.top_card:
+                card = self.top_card
+                self.move_knights(card.suit, +1)
+                self.top_card = None
+            if self.min_row and self.steps[self.min_row]["hidden"]:
+                self.steps[self.min_row]["hidden"] = False
+                self.steps[self.min_row]["pending"] = True
+            else:
+                self.top_card = self.deck.get_card()
+
+        return any([knight["row"] > self.length for knight in self.knights.values()])
+
+
 class Board:
     """
     Represents the game board.
@@ -329,53 +410,13 @@ class Board:
         card.refresh()
         return card
 
-
-class Game:
-    """
-    Represents a races game.
-
-    Attributes:
-        deck (Deck): The deck of cards used in the game.
-        board (Board): The game board.
-        length (int): The length of the game.
-        knights (dict): The knights in the game.
-        steps (dict): The steps in the game.
-        min_row (int): The minimum row value among the knights.
-        top_card (Card): The top card in the deck.
-    """
-
-    def __init__(self, board: Board):
-        """
-        Initializes a Game object.
-
-        Args:
-            board (Board): The game board.
-        """
-        self.deck = Deck(["golds", "cups", "swords", "clubs"], 12, shuffled=True)
-        self.board = board
-        self.length = board.get_game_length()
-        self.knights = {
-            n + 1: {"card": self.deck.get_card(suit, 11), "row": 0}
-            for n, suit in enumerate(self.deck.suits)
-        }
-        self.steps = {
-            i + 1: {"card": self.deck.get_card(), "hidden": True, "pending": False}
-            for i in range(self.length)
-        }
-        self.min_row = 0
-        self.top_card = None
-
-    def draw_game(self):
+    def draw_game(self, game: Game):
         """
         Draws the game board.
         """
-        # TODO: Move this method to another place
-        #  Game should be agnostic of the final representation
-        #  labels: enhancement
-        #  assignees: pablosambuco
-        self.board.clear()
-        box = self.board.draw_box(
-            (self.length + 2) * Board.CARD_HEIGHT + 2,
+        self.clear()
+        box = self.draw_box(
+            (game.length + 2) * Board.CARD_HEIGHT + 2,
             5 * (Board.CARD_WIDTH + 1) - 2,
             color_pair=5,
         )
@@ -389,63 +430,18 @@ class Game:
         )
         finish.message(f"{'FINISH':^{Board.CARD_WIDTH*4-2}}")
 
-        if self.top_card is None:
+        if game.top_card is None:
             box.draw_card(0, 0, "░░░░")
         else:
-            box.draw_card(0, 0, self.top_card.value, self.top_card.suit)
-        for n, step in self.steps.items():
+            box.draw_card(0, 0, game.top_card.value, game.top_card.suit)
+        for n, step in game.steps.items():
             if step["hidden"]:
                 box.draw_card(0, n, "░░░░")
             else:
                 box.draw_card(0, n, step["card"].value, step["card"].suit)
-        for n, knight in self.knights.items():
+        for n, knight in game.knights.items():
             box.draw_card(n, knight["row"], knight["card"].value, knight["card"].suit)
-        self.board.read_key()
-
-    def print_status(self):
-        """
-        Prints the current status of the game.
-        """
-        print(self.knights)
-        print(self.steps)
-
-    def move_knights(self, suit: str, step: int):
-        """
-        Moves the knights based on the suit and step value.
-
-        Args:
-            suit (str): The suit of the card.
-            step (int): The step value.
-        """
-        for knight in self.knights.values():
-            if knight["card"].match_suit(suit):
-                knight["row"] += step
-        self.min_row = min([knight["row"] for knight in self.knights.values()])
-
-    def step(self) -> bool:
-        """
-        Executes a step in the game.
-
-        Returns:
-            bool: True if the game has ended, False otherwise.
-        """
-        if self.min_row and self.steps[self.min_row]["pending"]:
-            self.steps[self.min_row]["pending"] = False
-            card = self.steps[self.min_row]["card"]
-            self.move_knights(card.suit, -1)
-            self.top_card = self.deck.get_card()
-        else:
-            if self.top_card:
-                card = self.top_card
-                self.move_knights(card.suit, +1)
-                self.top_card = None
-            if self.min_row and self.steps[self.min_row]["hidden"]:
-                self.steps[self.min_row]["hidden"] = False
-                self.steps[self.min_row]["pending"] = True
-            else:
-                self.top_card = self.deck.get_card()
-
-        return any([knight["row"] > self.length for knight in self.knights.values()])
+        self.read_key()
 
 
 def main(stdscr):
@@ -465,12 +461,13 @@ def main(stdscr):
     curses.init_pair(5, curses.COLOR_BLUE, 0)
 
     board = Board(stdscr)
-    game = Game(board)
-    game.draw_game()
+    game = Game(board.get_game_length())
+
+    board.draw_game(game)
     game_ended = False
     while not game_ended:
         game_ended = game.step()
-        game.draw_game()
+        board.draw_game(game)
 
 
 if __name__ == "__main__":
