@@ -1,0 +1,5 @@
+# For Windows systems
+windows-curses
+
+# Specify Python version compatibility
+python_version >= '3.11'
