@@ -62,7 +62,9 @@ class Game:
         self.min_row = 0
         self.top_card = None
 
-    def draw_game(self): #TODO! Move to Board. Game should be agnostic of the final representation
+    def draw_game(self): 
+        # TODO: Move to Board.
+        #  Game should be agnostic of the final representation
         self.board.clear()
         box = self.board.draw_box(
             (self.length + 2) * Board.CARD_HEIGHT + 2,
