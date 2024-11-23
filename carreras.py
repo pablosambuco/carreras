@@ -370,6 +370,7 @@ class Game:
         Draws the game board.
         """
         # TODO: Move this method to another place
+        # Issue URL: https://github.com/pablosambuco/carreras/issues/1
         #  Game should be agnostic of the final representation
         #  labels: enhancement
         #  assignees: pablosambuco
