@@ -46,7 +46,9 @@ class Board:
         self.screen.keypad(0)
         self.screen.leaveok(0)
         self.parent = parent
-        self.clear()
+
+        self.x_pos = 0
+        self.y_pos = 0
 
     def clear(self):
         """

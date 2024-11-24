@@ -20,9 +20,12 @@ def test_board_clear(mock_screen):
     mock_screen.clear.assert_called_once()
 
 def test_board_draw_box(mock_screen):
-    board = Board(mock_screen)
-    box = board.draw_box(10, 10)
-    assert isinstance(box, Board)
+    def setUp(self):
+        src.board.curses = mock.Mock()
+    def test_function(self):
+        board = Board(mock_screen)
+        box = board.draw_box(10, 10)
+        assert isinstance(box, Board)
 
 def test_board_message(mock_screen):
     board = Board(mock_screen)
