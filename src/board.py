@@ -4,6 +4,10 @@ from .card import Card
 import curses
 import sys
 
+# TODO: Agregar menü a la derecha
+#  Se debe construir un recuadro a la derecha del box principal
+#  labels: enhancement
+#  assignees: pablosambuco 
 
 class Board:
     """

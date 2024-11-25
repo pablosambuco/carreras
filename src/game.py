@@ -1,6 +1,16 @@
 from .deck import Deck
 from .card import Card
 
+# TODO: Permitir eleccion de jugadores
+#  Se puede jugar de 2 a 4 jugadores. En caso de ser menos que 4, se deben descartar los palos que sobran
+#  labels: enhancement
+#  assignees: pablosambuco
+
+# TODO: Permitir a los jugadores ingresar su nombre
+#  Los jugadores podrán tener un nombre y se les asignará un palo de la baraja
+#  labels: enhancement
+#  assignees: pablosambuco
+
 class Game:
     def __init__(self, length: int):
         self.deck = Deck(["golds", "cups", "swords", "clubs"], 12, shuffled=True)
