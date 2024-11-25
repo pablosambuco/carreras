@@ -157,6 +157,7 @@ class Board:
         players = self.read_key(Board.PLAYER_VALUES)
         self.message("Presiona 4, 5, 6 o 7 para definir el largo de la carrera: ")
         length = self.read_key(Board.LENGTH_VALUES)
+        self.message("Presiona cualquier tecla comenzar.")
         self.read_key()
         return players, length
 
@@ -221,7 +222,7 @@ class Board:
             "swords": {"symbol": "⚔", "color": curses.color_pair(3)},
             "clubs": {"symbol": "🌳", "color": curses.color_pair(4)},
         }
-        values = {
+        figures = {
             Card.JACK: "🕺",
             Card.KNIGHT: "🐴",
             Card.KING: "👑",
@@ -237,8 +238,7 @@ class Board:
         card.x_pos = 1
         card.y_pos = 1
         if suit:
-            if value in values:
-                value = values[value]
+            value = figures.get(value, value)
             card.message(
                 f"{value}{suits[suit]['symbol']}",
                 suits[suit]["color"],
@@ -289,7 +289,7 @@ class Board:
             Board.CARD_WIDTH + 1,
             4,
         )
-        finish.message(f"{'FINISH':^{Board.CARD_WIDTH*(game.players)-3}}")
+        finish.message(f"{'FINISH':^{Board.CARD_WIDTH*(game.players)-2}}")
 
         if game.top_card is None:
             box.draw_card(0, 0, "░░░░")
