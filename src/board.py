@@ -5,6 +5,7 @@ import curses
 import sys
 
 # TODO: Agregar menü a la derecha
+# Issue URL: https://github.com/pablosambuco/carreras/issues/7
 #  Se debe construir un recuadro a la derecha del box principal
 #  labels: enhancement
 #  assignees: pablosambuco 

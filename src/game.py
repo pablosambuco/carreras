@@ -2,9 +2,11 @@ from .deck import Deck
 from .card import Card
 
 # TODO: Permitir eleccion de jugadores
+# Issue URL: https://github.com/pablosambuco/carreras/issues/8
 #  Se puede jugar de 2 a 4 jugadores. En caso de ser menos que 4, se deben descartar los palos que sobran
 #  labels: enhancement
 #  assignees: pablosambuco
+
 
 # TODO: Permitir a los jugadores ingresar su nombre
 #  Los jugadores podrán tener un nombre y se les asignará un palo de la baraja

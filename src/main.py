@@ -11,6 +11,7 @@ def main():
         game_ended = game.step()
         board.draw_game(game)
     # TODO: Permitir reiniciar el juego
+    # Issue URL: https://github.com/pablosambuco/carreras/issues/10
     #  Si ek juego termina, quizas quieran otra partida
     #  asignees: pablosambuco
     #  labels: enhancement 
