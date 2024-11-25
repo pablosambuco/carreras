@@ -1,9 +1,11 @@
+"""Main"""
 from .board import Board
 from .game import Game
 
 def main():
     board = Board()
-    game = Game(board.get_game_length())
+    players, length = board.get_game_params()
+    game = Game(players, length)
 
     board.draw_game(game)
     game_ended = False

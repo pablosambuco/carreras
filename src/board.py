@@ -1,14 +1,18 @@
+"""Races Game Board curses implementation"""
+
 from typing import Optional, Self
 from .game import Game
 from .card import Card
 import curses
 import sys
+from time import sleep
 
 # TODO: Agregar menü a la derecha
 # Issue URL: https://github.com/pablosambuco/carreras/issues/7
 #  Se debe construir un recuadro a la derecha del box principal
 #  labels: enhancement
-#  assignees: pablosambuco 
+#  assignees: pablosambuco
+
 
 class Board:
     """
@@ -18,7 +22,8 @@ class Board:
         CARD_WIDTH (int): The width of a card.
         CARD_HEIGHT (int): The height of a card.
         EXIT_KEYS (list): Keys to exit the game.
-        ALLOWED_VALUES (dict): Allowed values for the game length.
+        LENGTH_VALUES (dict): Allowed values for the game length.
+        PLAYER_VALUES (dict): Allowed values for the playes.
         screen: The screen object for displaying the game.
         parent: The parent board, if any.
     """
@@ -27,9 +32,14 @@ class Board:
     CARD_HEIGHT = 3
     EXIT_KEYS = [113]
 
-    ALLOWED_VALUES = {52: 4, 53: 5, 54: 6, 55: 7}
+    LENGTH_VALUES = {52: 4, 53: 5, 54: 6, 55: 7}
+    PLAYER_VALUES = {50: 2, 51: 3, 52: 4}
 
-    def __init__(self, stdscr: Optional= None, parent: Optional[Self] = None):
+    def __init__(
+        self,
+        stdscr: Optional[curses.window] = None,
+        parent: Optional[Self] = None,
+    ):
         """
         Initializes a Board object.
 
@@ -74,7 +84,8 @@ class Board:
         Reads a key input from the user.
 
         Args:
-            return_list (dict, optional): A dictionary of allowed keys and their return values. Defaults to None.
+            return_list (dict, optional): A dictionary of allowed keys and their
+                return values. Defaults to None.
 
         Returns:
             The value corresponding to the key pressed.
@@ -85,7 +96,7 @@ class Board:
                 key = self.screen.getch()
                 sleep(0.1)
             if key in Board.EXIT_KEYS:
-                self.destroy() 
+                self.destroy()
                 sys.exit()
             if not return_list:
                 return
@@ -96,8 +107,7 @@ class Board:
         """
         Ends the curses window
         """
-        curses.endwin()  
-
+        curses.endwin()
 
     def message(self, message: str, attribs: int = 0):
         """
@@ -105,7 +115,8 @@ class Board:
 
         Args:
             message (str): The message to display.
-            attribs (int, optional): The attributes for the message. Defaults to 0.
+            attribs (int, optional): The attributes for the message.
+                Defaults to 0.
         """
         self.screen.addstr(self.y_pos, self.x_pos, message, attribs)
         self.refresh()
@@ -133,17 +144,21 @@ class Board:
         """
         self.screen.addstr(self.y_pos + y, self.x_pos + x, s)
 
-    def get_game_length(self) -> int:
+    def get_game_params(self) -> int:
         """
-        Prompts the user to select the game length.
+        Prompts the user to select the game players and length.
 
         Returns:
+            int: The selected players
             int: The selected game length.
         """
-        self.screen.bkgd(" ")
         self.message("Presiona Q en cualquier momento para salir del juego")
-        self.message("Presiona 4, 5, 6 o 7 para definir el largo de la carrera")
-        return self.read_key(Board.ALLOWED_VALUES)
+        self.message("Presiona 2, 3 o 4 para definir la cantidad de jugadores: ")
+        players = self.read_key(Board.PLAYER_VALUES)
+        self.message("Presiona 4, 5, 6 o 7 para definir el largo de la carrera: ")
+        length = self.read_key(Board.LENGTH_VALUES)
+        self.read_key()
+        return players, length
 
     def draw_box(
         self,
@@ -151,7 +166,7 @@ class Board:
         width: int,
         y: Optional[int] = None,
         x: Optional[int] = None,
-        color_pair: Optional[int] = None,
+        color_pair: Optional[int] = 0,
     ) -> Self:
         """
         Draws a box on the board.
@@ -161,7 +176,8 @@ class Board:
             width (int): The width of the box.
             y (int, optional): The y-coordinate. Defaults to None.
             x (int, optional): The x-coordinate. Defaults to None.
-            color_pair (int, optional): The color pair for the box. Defaults to None.
+            color_pair (int, optional): The color pair for the box.
+                0 by default
 
         Returns:
             Board: A new Board object representing the drawn box.
@@ -170,8 +186,6 @@ class Board:
             y = self.y_pos
         if not x:
             x = self.x_pos
-        if not color_pair:
-            color_pair = 0
 
         window = Board(self.screen.subwin(length, width, y, x), self)
         window.screen.attrset(curses.color_pair(color_pair))
@@ -182,7 +196,13 @@ class Board:
         window.refresh()
         return window
 
-    def draw_card(self, x: int, y: int, value: int, suit: Optional[str] = None) -> Self:
+    def draw_card(
+        self,
+        x: int,
+        y: int,
+        value: int,
+        suit: Optional[str] = None,
+    ) -> Self:
         """
         Draws a card on the board.
 
@@ -210,7 +230,8 @@ class Board:
         width = Board.CARD_WIDTH
         height = Board.CARD_HEIGHT
         card = Board(
-            self.screen.subwin(height, width, y * height + 1, x * width + 1), self
+            self.screen.subwin(height, width, y * height + 1, x * width + 1),
+            self,
         )
         card.screen.box()
         card.x_pos = 1
@@ -218,7 +239,10 @@ class Board:
         if suit:
             if value in values:
                 value = values[value]
-            card.message(f"{value}{suits[suit]['symbol']}", suits[suit]["color"])
+            card.message(
+                f"{value}{suits[suit]['symbol']}",
+                suits[suit]["color"],
+            )
         else:
             card.message(f"{value}", curses.color_pair(5))
         card.refresh()
@@ -229,9 +253,32 @@ class Board:
         Draws the game board.
         """
         self.clear()
+        lateral = self.draw_box(
+            (game.length + 2) * Board.CARD_HEIGHT + 2,
+            2 * (Board.CARD_WIDTH + 1),
+            0,
+            (game.players + 1) * (Board.CARD_WIDTH) + 2,
+            color_pair=0,
+        )
+        # title = lateral.draw_box(
+        #    # Board.CARD_HEIGHT,
+        #    # (Board.CARD_WIDTH + 1) - 2,
+        #    4,
+        #    4,
+        #    color_pair=2,
+        # )
+        # title.message(f"{'Carrera!':^{Board.CARD_WIDTH*2}}")
+        # menu = lateral.draw_box(
+        #    (game.length +1) * Board.CARD_HEIGHT,
+        #    2 * (Board.CARD_WIDTH + 1) - 2,
+        #    Board.CARD_HEIGHT + 1,
+        #    1,
+        #    color_pair = 4
+        # )
+        # menu.message("Q - Salir")
         box = self.draw_box(
             (game.length + 2) * Board.CARD_HEIGHT + 2,
-            5 * (Board.CARD_WIDTH + 1) - 2,
+            (game.players + 1) * (Board.CARD_WIDTH) + 2,
             color_pair=5,
         )
         finish_y, finish_x = box.screen.getmaxyx()
@@ -242,7 +289,7 @@ class Board:
             Board.CARD_WIDTH + 1,
             4,
         )
-        finish.message(f"{'FINISH':^{Board.CARD_WIDTH*4-2}}")
+        finish.message(f"{'FINISH':^{Board.CARD_WIDTH*(game.players)-3}}")
 
         if game.top_card is None:
             box.draw_card(0, 0, "░░░░")
@@ -254,6 +301,10 @@ class Board:
             else:
                 box.draw_card(0, n, step["card"].value, step["card"].suit)
         for n, knight in game.knights.items():
-            box.draw_card(n, knight["row"], knight["card"].value, knight["card"].suit)
+            box.draw_card(
+                n,
+                knight["row"],
+                knight["card"].value,
+                knight["card"].suit,
+            )
         self.read_key()
-
