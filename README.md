@@ -21,7 +21,7 @@ pip install -r requirements.txt
 Ensure you have set up the environment with the necessary dependencies. Refer to the [Installation](#installation) section for instructions on how to install the required packages.
 To start the game, run the `carreras.py` file. 
 ```bash 
-python carreras.py
+python -m src.main
 ```
 
 ## Game Rules
