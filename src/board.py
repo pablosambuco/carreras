@@ -1,11 +1,11 @@
 """Races Game Board curses implementation"""
 
+import sys
+import curses
+from time import sleep
 from typing import Optional, Self
 from .game import Game
 from .card import Card
-import curses
-import sys
-from time import sleep
 
 # TODO: Agregar menü a la derecha
 # Issue URL: https://github.com/pablosambuco/carreras/issues/7
@@ -103,6 +103,16 @@ class Board:
             if key in return_list:
                 return return_list[key]
 
+
+    def read_string(self) -> str:
+        """
+        Reads a string input from the user.
+
+        Returns:
+            The string value.
+        """
+        return str(self.screen.getstr())
+
     def destroy(self):
         """
         Ends the curses window
@@ -151,15 +161,21 @@ class Board:
         Returns:
             int: The selected players
             int: The selected game length.
+            list[str]: The entered players' names.
         """
         self.message("Presiona Q en cualquier momento para salir del juego")
         self.message("Presiona 2, 3 o 4 para definir la cantidad de jugadores: ")
         players = self.read_key(Board.PLAYER_VALUES)
+        players_names = []
+        for i in range (players):
+            self.message(f"Ingresa el nombre para el jugador {i+1}: ")
+            player_name = self.read_string()
+            players_names.append(player_name)
         self.message("Presiona 4, 5, 6 o 7 para definir el largo de la carrera: ")
         length = self.read_key(Board.LENGTH_VALUES)
         self.message("Presiona cualquier tecla comenzar.")
         self.read_key()
-        return players, length
+        return players, length, players_names
 
     def draw_box(
         self,

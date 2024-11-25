@@ -1,12 +1,7 @@
 """Races Game"""
 
+from typing import List
 from .deck import Deck
-from .card import Card
-
-# TODO: Permitir a los jugadores ingresar su nombre
-#  Los jugadores podrán tener un nombre y se les asignará un palo de la baraja
-#  labels: enhancement
-#  assignees: pablosambuco
 
 
 class Game:
@@ -22,7 +17,12 @@ class Game:
         top_card (Card): The top card in the deck.
     """
 
-    def __init__(self, players: int = 4, length: int = 7):
+    def __init__(
+        self,
+        players: int = 4,
+        length: int = 7,
+        players_names: List[str] = None,
+    ):
         """
         Initializes a Game object.
         Args:
@@ -35,8 +35,16 @@ class Game:
         )
         self.length = length
         self.players = players
+
+        if not players_names:
+            players_names = [""] * players
+        self.players_names = players_names
         self.knights = {
-            n + 1: {"card": self.deck.get_card(suit, 11), "row": 0}
+            (n + 1): {
+                "card": self.deck.get_card(suit, 11),
+                "row": 0,
+                "player": players_names[n],
+            }
             for n, suit in enumerate(self.deck.suits)
         }
         self.steps = {

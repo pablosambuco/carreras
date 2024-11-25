@@ -4,8 +4,8 @@ from .game import Game
 
 def main():
     board = Board()
-    players, length = board.get_game_params()
-    game = Game(players, length)
+    players, length, players_names = board.get_game_params()
+    game = Game(players, length, players_names)
 
     board.draw_game(game)
     game_ended = False
