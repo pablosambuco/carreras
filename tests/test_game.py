@@ -2,9 +2,11 @@ from src.game import Game
 from src.deck import Deck
 
 def test_game_initialization():
-    game = Game(5)
+    game = Game(3,5,["Mock1","Mock2","Mock3"])
     assert isinstance(game.deck, Deck)
-    assert len(game.knights) == 4
+    assert game.players == 3
+    assert len(game.players_names) == 3
+    assert len(game.knights) == 3
     assert len(game.steps) == 5
 
 def test_game_move_knights():
