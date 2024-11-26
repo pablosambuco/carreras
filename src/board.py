@@ -111,6 +111,8 @@ class Board:
         """
 
         # TODO: Mejorar interaccion de teclado
+        # Issue URL: https://github.com/pablosambuco/carreras/issues/15
+        # Issue URL: https://github.com/pablosambuco/carreras/issues/15
         #  Se debería generar un diccionario de valor de teclas y acciones a realizar o bien un metodo donde se concentre todo el tratamiento del input
         #  asignees: pablosambuco
         #  label: enhancement
