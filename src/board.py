@@ -181,6 +181,10 @@ class Board:
             int: The selected game length.
             list[str]: The entered players' names.
         """
+        # TODO: Setear valores por defecto
+        #  Modificar los parámetros para establecwr un valor por defecto (jugadores = 2, largo = 7, player 1, 2, 3, 4)
+        #  labels: enhancement
+        #  assignees: pablosambuco
         self.message("Presiona Q en cualquier momento para salir del juego")
         self.message("Presiona 2, 3 o 4 para definir la cantidad de jugadores: ")
         players = self.read_key(Board.PLAYER_VALUES)
