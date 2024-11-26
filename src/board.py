@@ -30,13 +30,6 @@ class Board:
 
     CARD_WIDTH = 6
     CARD_HEIGHT = 3
-
-
-    # TODO: Mejorar teclas de interaccion
-    #  Se debería generar un diccionario de valor de teclas y acciones a realizar o bien un método donde se concentre todo el tratamiento del input
-    #  asignees: pablosambuco
-    #  label: enhancement
-
     EXIT_KEYS = [113]
 
     LENGTH_VALUES = {52: 4, 53: 5, 54: 6, 55: 7}
@@ -116,6 +109,12 @@ class Board:
         Returns:
             The value corresponding to the key pressed.
         """
+
+        # TODO: Mejorar interaccion
+        #  Se debería generar un diccionario de valor de teclas y acciones a realizar o bien un método donde se concentre todo el tratamiento del input
+        #  asignees: pablosambuco
+        #  label: enhancement
+
         while True:
             key = self.screen.getch()
             while key == -1:
