@@ -33,6 +33,7 @@ class Game:
             12,
             shuffled=True,
         )
+        self.discarded = Deck([],0)
         self.length = length
         self.players = players
 
@@ -88,16 +89,26 @@ class Game:
             self.steps[self.min_row]["pending"] = False
             card = self.steps[self.min_row]["card"]
             self.move_knights(card.suit, -1)
+
+            if not self.deck.remaining():
+                self.deck = self.discarded
+                self.deck.shuffle()
+                self.discarded = Deck([],0)
             self.top_card = self.deck.get_card()
         else:
             if self.top_card:
                 card = self.top_card
+                self.discarded.insert_card(card)
                 self.move_knights(card.suit, +1)
                 self.top_card = None
             if self.min_row and self.steps[self.min_row]["hidden"]:
                 self.steps[self.min_row]["hidden"] = False
                 self.steps[self.min_row]["pending"] = True
             else:
+                if not self.deck.remaining():
+                    self.deck = self.discarded
+                    self.deck.shuffle()
+                    self.discarded = Deck([],0)
                 self.top_card = self.deck.get_card()
 
         return any(knight["row"] > self.length for knight in self.knights.values())

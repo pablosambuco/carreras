@@ -1,7 +1,9 @@
 """Deck"""
+
 from random import shuffle
 from typing import List, Optional
 from .card import Card
+
 
 class Deck:
     """
@@ -9,7 +11,8 @@ class Deck:
     Attributes:
         suits (list): A list of suits in the deck.
         cards (list): A list of Card objects in the deck.
-    """    
+    """
+
     def __init__(self, suits: List[str], q: int, shuffled: bool = False):
         """
         Initializes a Deck object with the given suits and card quantity.
@@ -17,7 +20,7 @@ class Deck:
             suits (list): A list of suits for the deck.
             q (int): The number of cards per suit.
             shuffled (bool): If True, shuffle the deck after creating it.
-        """        
+        """
         self.suits = suits
         self.cards = [Card(s, v) for v in range(1, q + 1) for s in suits]
         if shuffled:
@@ -26,10 +29,15 @@ class Deck:
     def shuffle(self):
         """
         Shuffles the cards in the deck.
-        """        
+        """
         shuffle(self.cards)
 
-    def get_card(self, suit: Optional[str] = None, value: Optional[int] = None) -> Optional[Card]:
+    def remaining(self) -> int:
+        return len(self.cards)
+
+    def get_card(
+        self, suit: Optional[str] = None, value: Optional[int] = None
+    ) -> Optional[Card]:
         """
         Retrieves a card from the deck.
         Args:
@@ -37,7 +45,7 @@ class Deck:
             value (int, optional): The value of the card to retrieve. Defaults to None.
         Returns:
             Card: The retrieved card, or None if the card is not found.
-        """        
+        """
         if not suit or not value:
             return self.cards.pop()
         aux = Card(suit, value)
@@ -51,7 +59,6 @@ class Deck:
         Inserts a card back into the deck.
         Args:
             card (Card): The card to insert.
-        """        
+        """
         if card not in self.cards:
             self.cards.append(card)
-

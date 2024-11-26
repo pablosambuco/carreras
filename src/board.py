@@ -35,6 +35,19 @@ class Board:
     LENGTH_VALUES = {52: 4, 53: 5, 54: 6, 55: 7}
     PLAYER_VALUES = {50: 2, 51: 3, 52: 4}
 
+    SUITS = {
+        "golds": {"symbol": "🪙", "color": 1},
+        "cups": {"symbol": "🍷", "color": 2},
+        "swords": {"symbol": "⚔", "color": 3},
+        "clubs": {"symbol": "🌳", "color": 4},
+    }
+
+    FIGURES = {
+        Card.JACK: "🕺",
+        Card.KNIGHT: "🐴",
+        Card.KING: "👑",
+    }
+
     def __init__(
         self,
         stdscr: Optional[curses.window] = None,
@@ -65,13 +78,19 @@ class Board:
         self.x_pos = 0
         self.y_pos = 0
 
+    def set_pos(self, y, x):
+        """
+        Clears the screen.
+        """
+        self.y_pos = y
+        self.x_pos = x
+
     def clear(self):
         """
         Clears the screen.
         """
         self.screen.clear()
-        self.x_pos = 0
-        self.y_pos = 0
+        self.set_pos(0, 0)
 
     def refresh(self):
         """
@@ -103,7 +122,6 @@ class Board:
             if key in return_list:
                 return return_list[key]
 
-
     def read_string(self) -> str:
         """
         Reads a string input from the user.
@@ -111,7 +129,7 @@ class Board:
         Returns:
             The string value.
         """
-        return str(self.screen.getstr())
+        return self.screen.getstr().decode("utf-8")
 
     def destroy(self):
         """
@@ -167,7 +185,7 @@ class Board:
         self.message("Presiona 2, 3 o 4 para definir la cantidad de jugadores: ")
         players = self.read_key(Board.PLAYER_VALUES)
         players_names = []
-        for i in range (players):
+        for i in range(players):
             self.message(f"Ingresa el nombre para el jugador {i+1}: ")
             player_name = self.read_string()
             players_names.append(player_name)
@@ -204,7 +222,7 @@ class Board:
         if not x:
             x = self.x_pos
 
-        window = Board(self.screen.subwin(length, width, y, x), self)
+        window = Board(self.screen.derwin(length, width, y, x), self)
         window.screen.attrset(curses.color_pair(color_pair))
         window.screen.box()
         window.screen.attrset(curses.color_pair(0))
@@ -232,32 +250,20 @@ class Board:
         Returns:
             Board: A new Board object representing the drawn card.
         """
-        suits = {
-            "golds": {"symbol": "🪙", "color": curses.color_pair(1)},
-            "cups": {"symbol": "🍷", "color": curses.color_pair(2)},
-            "swords": {"symbol": "⚔", "color": curses.color_pair(3)},
-            "clubs": {"symbol": "🌳", "color": curses.color_pair(4)},
-        }
-        figures = {
-            Card.JACK: "🕺",
-            Card.KNIGHT: "🐴",
-            Card.KING: "👑",
-        }
-
         width = Board.CARD_WIDTH
         height = Board.CARD_HEIGHT
         card = Board(
-            self.screen.subwin(height, width, y * height + 1, x * width + 1),
+            self.screen.derwin(height, width, y * height + 1, x * width + 1),
             self,
         )
         card.screen.box()
         card.x_pos = 1
         card.y_pos = 1
         if suit:
-            value = figures.get(value, value)
+            value = Board.FIGURES.get(value, value)
             card.message(
-                f"{value}{suits[suit]['symbol']}",
-                suits[suit]["color"],
+                f"{value}{Board.SUITS[suit]['symbol']}",
+                curses.color_pair(Board.SUITS[suit]["color"]),
             )
         else:
             card.message(f"{value}", curses.color_pair(5))
@@ -272,33 +278,63 @@ class Board:
         lateral = self.draw_box(
             (game.length + 2) * Board.CARD_HEIGHT + 2,
             2 * (Board.CARD_WIDTH + 1),
-            0,
-            (game.players + 1) * (Board.CARD_WIDTH) + 2,
+            # 0,
+            # (game.players + 1) * (Board.CARD_WIDTH) + 2,
             color_pair=0,
         )
-        # title = lateral.draw_box(
-        #    # Board.CARD_HEIGHT,
-        #    # (Board.CARD_WIDTH + 1) - 2,
-        #    4,
-        #    4,
-        #    color_pair=2,
-        # )
-        # title.message(f"{'Carrera!':^{Board.CARD_WIDTH*2}}")
-        # menu = lateral.draw_box(
-        #    (game.length +1) * Board.CARD_HEIGHT,
-        #    2 * (Board.CARD_WIDTH + 1) - 2,
-        #    Board.CARD_HEIGHT + 1,
-        #    1,
-        #    color_pair = 4
-        # )
-        # menu.message("Q - Salir")
-        box = self.draw_box(
+        title = lateral.draw_box(
+            Board.CARD_HEIGHT,
+            2 * (Board.CARD_WIDTH + 1) - 2,
+            1,
+            1,
+        )
+        title.message(f"{'CARRERAS':^{Board.CARD_WIDTH*2-2}}")
+        players = lateral.draw_box(
+            (game.players + 2),
+            2 * (Board.CARD_WIDTH + 1) - 2,
+            Board.CARD_HEIGHT + 1,
+            1,
+            color_pair=3,
+        )
+
+        rank = {
+            row: i + 1
+            for i, row in enumerate(
+                sorted(set(k["row"] for k in game.knights.values()),reverse=True)
+            )
+        }
+        status = sorted(
+            (
+                rank[k["row"]],
+                k["player"],
+                Board.SUITS[k["card"].suit]["symbol"],
+                curses.color_pair(Board.SUITS[k["card"].suit]["color"]),
+            )
+            for k in game.knights.values()
+        )
+        for player in status:
+            players.message(
+                f"{player[0]}:{player[1][:Board.CARD_WIDTH*2-6]:<{Board.CARD_WIDTH*2-6}}{player[2]}",
+                curses.color_pair(player[3]),
+            )
+        menu = lateral.draw_box(
+            (game.length + 1) * Board.CARD_HEIGHT - (game.players + 2),
+            2 * (Board.CARD_WIDTH + 1) - 2,
+            Board.CARD_HEIGHT + 1 + (game.players + 2),
+            1,
+            color_pair=4,
+        )
+        menu.set_pos((game.length + 1) * Board.CARD_HEIGHT - (game.players + 4), 2)
+        menu.message("Q: Salir")
+        body = self.draw_box(
             (game.length + 2) * Board.CARD_HEIGHT + 2,
             (game.players + 1) * (Board.CARD_WIDTH) + 2,
+            0,
+            2 * (Board.CARD_WIDTH + 1),
             color_pair=5,
         )
-        finish_y, finish_x = box.screen.getmaxyx()
-        finish = box.draw_box(
+        finish_y, finish_x = body.screen.getmaxyx()
+        finish = body.draw_box(
             Board.CARD_HEIGHT,
             finish_x - Board.CARD_WIDTH - 2,
             finish_y - Board.CARD_HEIGHT - 1,
@@ -308,16 +344,16 @@ class Board:
         finish.message(f"{'FINISH':^{Board.CARD_WIDTH*(game.players)-2}}")
 
         if game.top_card is None:
-            box.draw_card(0, 0, "░░░░")
+            body.draw_card(0, 0, "░░░░")
         else:
-            box.draw_card(0, 0, game.top_card.value, game.top_card.suit)
+            body.draw_card(0, 0, game.top_card.value, game.top_card.suit)
         for n, step in game.steps.items():
             if step["hidden"]:
-                box.draw_card(0, n, "░░░░")
+                body.draw_card(0, n, "░░░░")
             else:
-                box.draw_card(0, n, step["card"].value, step["card"].suit)
+                body.draw_card(0, n, step["card"].value, step["card"].suit)
         for n, knight in game.knights.items():
-            box.draw_card(
+            body.draw_card(
                 n,
                 knight["row"],
                 knight["card"].value,
