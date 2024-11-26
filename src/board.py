@@ -182,6 +182,7 @@ class Board:
             list[str]: The entered players' names.
         """
         # TODO: Setear valores por defecto
+        # Issue URL: https://github.com/pablosambuco/carreras/issues/11
         #  Modificar los parámetros para establecwr un valor por defecto (jugadores = 2, largo = 7, player 1, 2, 3, 4)
         #  labels: enhancement
         #  assignees: pablosambuco
