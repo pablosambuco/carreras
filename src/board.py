@@ -35,6 +35,7 @@ class Board:
     # TODO: Mejorar teclas de interaccion
     #  Se debería generar un diccionario de valor de teclas y acciones a realizar
     #  o bien un método donde se concentre todo el tratamiento del input
+    #  o bien un método donde se concentre todo el tratamiento del input
     #  asignees: pablosambuco
     #  label: enhancement
 
