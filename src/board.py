@@ -110,10 +110,8 @@ class Board:
             The value corresponding to the key pressed.
         """
 
-        # TODO: Mejorar interaccion
-        # Issue URL: https://github.com/pablosambuco/carreras/issues/13
-        # Issue URL: https://github.com/pablosambuco/carreras/issues/13
-        #  Se debería generar un diccionario de valor de teclas y acciones a realizar o bien un método donde se concentre todo el tratamiento del input
+        # TODO: Mejorar interaccion de teclado
+        #  Se debería generar un diccionario de valor de teclas y acciones a realizar o bien un metodo donde se concentre todo el tratamiento del input
         #  asignees: pablosambuco
         #  label: enhancement
 
