@@ -7,7 +7,7 @@ A terminal-based horse racing game written in Python using the `curses` library.
 - Terminal-based UI with color support
 - Interactive game with user inputs
 - Customizable game length
-- Real-time horse movements based on card draws
+- Horse movements based on card draws
 
 ## Installation
 
@@ -26,7 +26,7 @@ python -m src.main
 
 ## Game Rules
 
-1. The game begins by asking the user to select the length of the race.
+1. The game begins by asking the user to select the number of players, their names and the length of the race.
 2. Each horse is represented by a suit (`golds`, `cups`, `swords`, `clubs`).
 3. Horses move forward or backward based on the drawn card's suit.
 4. The game ends when a horse crosses the finish line.
@@ -47,10 +47,7 @@ Handles the display and user interaction using the `curses` library.
 
 ### Game Class
 
-Manages the game logic, including initializing the game, drawing the game board, and moving horses.
-
-## Future Improvements 
-- **Modularization:** The game will be split into several modules to improve portability and facilitate integration with other graphical interfaces. This will make the game more flexible and easier to extend.
+Manages the game logic, including initializing the game and moving horses.
 
 ## Contributing
 
