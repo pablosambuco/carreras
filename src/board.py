@@ -3,15 +3,9 @@
 import sys
 import curses
 from time import sleep
-from typing import Optional, Self
+from typing import Optional, Self, Tuple
 from .game import Game
 from .card import Card
-
-# TODO: Agregar menü a la derecha
-# Issue URL: https://github.com/pablosambuco/carreras/issues/7
-#  Se debe construir un recuadro a la derecha del box principal
-#  labels: enhancement
-#  assignees: pablosambuco
 
 
 class Board:
@@ -34,6 +28,7 @@ class Board:
 
     LENGTH_VALUES = {52: 4, 53: 5, 54: 6, 55: 7}
     PLAYER_VALUES = {50: 2, 51: 3, 52: 4}
+    YES_NO_VALUES = {115: 1, 110: 0, 83: 1, 78: 0}
 
     SUITS = {
         "golds": {"symbol": "🪙", "color": 1},
@@ -47,6 +42,8 @@ class Board:
         Card.KNIGHT: "🐴",
         Card.KING: "👑",
     }
+
+    KEY_ACTIONS = {113: ("Q", quit), 81: ("Q", quit)}
 
     def __init__(
         self,
@@ -98,6 +95,10 @@ class Board:
         """
         self.screen.refresh()
 
+    def quit(self):
+        self.destroy()
+        sys.exit()
+
     def read_key(self, return_list: Optional[dict] = None) -> Optional[int]:
         """
         Reads a key input from the user.
@@ -122,9 +123,8 @@ class Board:
             while key == -1:
                 key = self.screen.getch()
                 sleep(0.1)
-            if key in Board.EXIT_KEYS:
-                self.destroy()
-                sys.exit()
+            if key in Board.KEY_ACTIONS:
+                Board.KEY_ACTIONS[key][1]()
             if not return_list:
                 return
             if key in return_list:
@@ -180,7 +180,7 @@ class Board:
         """
         self.screen.addstr(self.y_pos + y, self.x_pos + x, s)
 
-    def get_game_params(self) -> int:
+    def get_game_params(self) -> Tuple[int, int, list[str]]:
         """
         Prompts the user to select the game players and length.
 
@@ -207,6 +207,26 @@ class Board:
         self.message("Presiona cualquier tecla comenzar.")
         self.read_key()
         return players, length, players_names
+
+    def ask_restart(self) -> Tuple[bool, bool]:
+        """
+        Prompts the user to restart the game
+
+        Returns:
+            bool: The decision to restart
+            bool: If will restart, if it will be with the same parameters
+        """
+        self.clear()
+        self.message("Queres reiniciar el juego? S: Si / N: No")
+        restart = self.read_key(Board.YES_NO_VALUES)
+        if not restart:
+            return False, False
+
+        self.message("Mismos jugadores y largo? S: Si / N: No")
+        same_params = self.read_key(Board.YES_NO_VALUES)
+        if same_params:
+            return True, True
+        return True, False
 
     def draw_box(
         self,
@@ -291,8 +311,6 @@ class Board:
         lateral = self.draw_box(
             (game.length + 2) * Board.CARD_HEIGHT + 2,
             2 * (Board.CARD_WIDTH + 1),
-            # 0,
-            # (game.players + 1) * (Board.CARD_WIDTH) + 2,
             color_pair=0,
         )
         title = lateral.draw_box(
@@ -313,7 +331,7 @@ class Board:
         rank = {
             row: i + 1
             for i, row in enumerate(
-                sorted(set(k["row"] for k in game.knights.values()),reverse=True)
+                sorted(set(k["row"] for k in game.knights.values()), reverse=True)
             )
         }
         status = sorted(
