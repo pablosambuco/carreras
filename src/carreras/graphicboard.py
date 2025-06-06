@@ -5,7 +5,7 @@ import sys
 from typing import Optional, Tuple
 from .game import Game
 from .card import Card
-from paraminput import ParamInputMixin
+from .paraminput import ParamInputMixin
 
 
 class GraphicBoard(ParamInputMixin):
