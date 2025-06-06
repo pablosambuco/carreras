@@ -44,7 +44,11 @@ class Board(ParamInputMixin):
         Card.KING: "👑",
     }
 
-    KEY_ACTIONS = {113: ("Q", lambda: sys.exit()), 81: ("Q", lambda: sys.exit())}
+    KEY_ACTIONS = {
+        113: ("Q", sys.exit),  # q
+        81: ("Q", sys.exit),   # Q
+        27: ("ESC", sys.exit), # ESC
+    }
 
     def __init__(
         self,
@@ -111,25 +115,28 @@ class Board(ParamInputMixin):
         Returns:
             The value corresponding to the key pressed.
         """
-
-        # TODO: Mejorar interaccion de teclado
-        # Issue URL: https://github.com/pablosambuco/carreras/issues/15
-        # Issue URL: https://github.com/pablosambuco/carreras/issues/15
-        #  Se debería generar un diccionario de valor de teclas y acciones a realizar o bien un metodo donde se concentre todo el tratamiento del input
-        #  asignees: pablosambuco
-        #  label: enhancement
-
         while True:
             key = self.screen.getch()
             while key == -1:
                 key = self.screen.getch()
                 sleep(0.1)
+            # Make key handling case-insensitive for letters
+            if 65 <= key <= 90:  # Uppercase A-Z
+                key_lower = key + 32
+            else:
+                key_lower = key
             if key in Board.KEY_ACTIONS:
                 Board.KEY_ACTIONS[key][1]()
+            if key_lower in Board.KEY_ACTIONS:
+                Board.KEY_ACTIONS[key_lower][1]()
             if not return_list:
                 return
             if key in return_list:
                 return return_list[key]
+            if key_lower in return_list:
+                return return_list[key_lower]
+            # Show error message for invalid key
+            self.message("Tecla inválida. Intenta de nuevo.", curses.A_BOLD)
 
     def read_string(self) -> str:
         """
@@ -187,11 +194,22 @@ class Board(ParamInputMixin):
         return self.read_key(Board.PLAYER_VALUES)
 
     def ask_player_names(self, count: int) -> list[str]:
+        """
+        Prompts the user to enter unique, non-empty player names.
+        """
         players_names = []
         for i in range(count):
-            self.message(f"Ingresa el nombre para el jugador {i+1}: ")
-            player_name = self.read_string()
-            players_names.append(player_name)
+            while True:
+                self.message(f"Ingresa el nombre para el jugador {i+1}: ")
+                player_name = self.read_string().strip()
+                if not player_name:
+                    self.message("El nombre no puede estar vacío.", curses.A_BOLD)
+                    continue
+                if player_name in players_names:
+                    self.message("El nombre ya fue usado. Elige otro.", curses.A_BOLD)
+                    continue
+                players_names.append(player_name)
+                break
         return players_names
 
     def ask_race_length(self) -> int:
@@ -285,11 +303,11 @@ class Board(ParamInputMixin):
         if suit:
             value = Board.FIGURES.get(value, value)
             card.message(
-                f"{value}{Board.SUITS[suit]['symbol']}",
+                f'{value}{Board.SUITS[suit]["symbol"]}',
                 curses.color_pair(Board.SUITS[suit]["color"]),
             )
         else:
-            card.message(f"{value}", curses.color_pair(5))
+            card.message(f'{value}', curses.color_pair(5))
         card.refresh()
         return card
 
@@ -309,7 +327,7 @@ class Board(ParamInputMixin):
             1,
             1,
         )
-        title.message(f"{'CARRERAS':^{Board.CARD_WIDTH*2-2}}")
+        title.message(f'{"CARRERAS":^{Board.CARD_WIDTH*2-2}}')
         players = lateral.draw_box(
             (game.players + 2),
             2 * (Board.CARD_WIDTH + 1) - 2,
@@ -362,7 +380,7 @@ class Board(ParamInputMixin):
             Board.CARD_WIDTH + 1,
             4,
         )
-        finish.message(f"{'FINISH':^{Board.CARD_WIDTH*(game.players)-2}}")
+        finish.message(f'{"FINISH":^{Board.CARD_WIDTH*(game.players)-2}}')
 
         if game.top_card is None:
             body.draw_card(0, 0, "░░░░")
