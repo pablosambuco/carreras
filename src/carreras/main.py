@@ -3,7 +3,16 @@
 import argparse
 
 from carreras.board import Board
-from carreras.graphicboard import GraphicBoard
+
+# Intenta importar pygame, si falla, usa curses
+try:
+    import pygame  # noqa: F401
+    from carreras.graphicboard import GraphicBoard
+
+    HAS_PYGAME = True
+except ImportError:
+    HAS_PYGAME = False
+
 from carreras.game import Game
 
 
@@ -57,7 +66,11 @@ def main():
     args = parser.parse_args()
 
     if args.gui:
-        board = GraphicBoard()
+        if HAS_PYGAME:
+            board = GraphicBoard()
+        else:
+            print("Pygame no está instalado. Usando interfaz de texto (curses) en su lugar.")
+            board = Board()
     else:
         board = Board()
 
