@@ -4,9 +4,9 @@ import sys
 import curses
 from time import sleep
 from typing import Optional, Tuple
-from .game import Game
-from .card import Card
-from .paraminput import ParamInputMixin
+from carreras.game import Game
+from carreras.card import Card
+from carreras.paraminput import ParamInputMixin
 
 
 class Board(ParamInputMixin):

@@ -1,11 +1,10 @@
 """Main"""
 
-import sys
 import argparse
 
-from .board import Board
-from .graphicboard import GraphicBoard
-from .game import Game
+from carreras.board import Board
+from carreras.graphicboard import GraphicBoard
+from carreras.game import Game
 
 
 def iniciar_juego(

@@ -1,7 +1,7 @@
 """Races Game"""
 
 from typing import List
-from .deck import Deck
+from carreras.deck import Deck
 
 
 class Game:

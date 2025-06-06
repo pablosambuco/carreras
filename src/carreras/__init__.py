@@ -1,7 +1,7 @@
-from .card import Card
-from .deck import Deck
-from .game import Game
-from .board import Board
+from carreras.card import Card
+from carreras.deck import Deck
+from carreras.game import Game
+from carreras.board import Board
 
 __all__ = ["Card", "Deck", "Game", "Board"]
 
