@@ -3,9 +3,9 @@
 import pygame
 import sys
 from typing import Optional, Tuple
-from carreras.game import Game
-from carreras.card import Card
-from carreras.paraminput import ParamInputMixin
+from .game import Game
+from .card import Card
+from .paraminput import ParamInputMixin
 
 
 class GraphicBoard(ParamInputMixin):
@@ -16,8 +16,8 @@ class GraphicBoard(ParamInputMixin):
     """
     
     # Constants matching the original Board class
-    CARD_WIDTH = 120
-    CARD_HEIGHT = 80
+    CARD_WIDTH = 80
+    CARD_HEIGHT = 120
     EXIT_KEYS = [pygame.K_q]
     
     LENGTH_VALUES = {pygame.K_4: 4, pygame.K_5: 5, pygame.K_6: 6, pygame.K_7: 7}
