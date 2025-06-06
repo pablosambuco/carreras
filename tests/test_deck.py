@@ -1,5 +1,5 @@
-from src.deck import Deck
-from src.card import Card
+from deck import Deck
+from card import Card
 
 def test_deck_initialization():
     suits = ["golds", "cups"]

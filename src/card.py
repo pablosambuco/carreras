@@ -25,7 +25,7 @@ class Card:
         self.suit = suit
         self.value = value
 
-    def __eq__(self, other: Self) -> bool:
+    def __eq__(self, other: object) -> bool:
         """
         Compares this card with another card for equality.
         Args:
@@ -33,6 +33,8 @@ class Card:
         Returns:
             bool: True if both cards have the same suit and value, False otherwise.
         """
+        if not isinstance(other, Card):
+            return NotImplemented
         return self.suit == other.suit and self.value == other.value
 
     def __str__(self) -> str:

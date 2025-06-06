@@ -5,9 +5,10 @@ import sys
 from typing import Optional, Tuple
 from .game import Game
 from .card import Card
+from paraminput import ParamInputMixin
 
 
-class GraphicBoard:
+class GraphicBoard(ParamInputMixin):
     """
     Represents the graphical game board using pygame.
     
@@ -68,34 +69,15 @@ class GraphicBoard:
         self.clock = pygame.time.Clock()
         self.running = True
     
-    def get_game_params(self) -> Tuple[int, int, list[str]]:
-        """Prompt user for game parameters using graphical interface."""
-        players = self._get_player_count()
-        if players is None:
-            self.destroy()
-            sys.exit()
-            
-        players_names = self._get_player_names(players)
-        if players_names is None:
-            self.destroy()
-            sys.exit()
-            
-        length = self._get_race_length()
-        if length is None:
-            self.destroy()
-            sys.exit()
-            
-        return players, length, players_names
-    
-    def _get_player_count(self) -> Optional[int]:
-        """Get number of players (2-4)."""
+    def ask_player_count(self) -> int:
+        """Ask for the number of players (2-4)."""
         while self.running:
             for event in pygame.event.get():
                 if event.type == pygame.QUIT or (event.type == pygame.KEYDOWN and event.key == pygame.K_q):
-                    return None
+                    self.destroy()
+                    sys.exit()
                 if event.type == pygame.KEYDOWN and event.key in self.PLAYER_VALUES:
                     return self.PLAYER_VALUES[event.key]
-            
             self.screen.fill(self.bg_color)
             self._draw_text("Press Q to quit", self.font_medium, self.white, 50, 50)
             self._draw_text("Press 2, 3, or 4 to select number of players:", 
@@ -103,18 +85,19 @@ class GraphicBoard:
             pygame.display.flip()
             self.clock.tick(60)
         
-        return None
+        return 2  # fallback
     
-    def _get_player_names(self, players: int) -> Optional[list[str]]:
-        """Get player names."""
+    def ask_player_names(self, count: int) -> list[str]:
+        """Ask for player names."""
         names = []
         current_name = ""
         
-        for i in range(players):
+        for i in range(count):
             while self.running:
                 for event in pygame.event.get():
                     if event.type == pygame.QUIT or (event.type == pygame.KEYDOWN and event.key == pygame.K_q):
-                        return None
+                        self.destroy()
+                        sys.exit()
                     if event.type == pygame.KEYDOWN:
                         if event.key == pygame.K_RETURN:
                             if current_name.strip():
@@ -140,12 +123,13 @@ class GraphicBoard:
         
         return names
     
-    def _get_race_length(self) -> Optional[int]:
-        """Get race length (4-7)."""
+    def ask_race_length(self) -> int:
+        """Ask for the race length (4-7)."""
         while self.running:
             for event in pygame.event.get():
                 if event.type == pygame.QUIT or (event.type == pygame.KEYDOWN and event.key == pygame.K_q):
-                    return None
+                    self.destroy()
+                    sys.exit()
                 if event.type == pygame.KEYDOWN and event.key in self.LENGTH_VALUES:
                     return self.LENGTH_VALUES[event.key]
             
@@ -155,7 +139,7 @@ class GraphicBoard:
             pygame.display.flip()
             self.clock.tick(60)
         
-        return None
+        return 4  # fallback
     
     def draw_game(self, game: Game):
         """Draw the complete game state."""

@@ -3,12 +3,13 @@
 import sys
 import curses
 from time import sleep
-from typing import Optional, Self, Tuple
-from .game import Game
-from .card import Card
+from typing import Optional, Tuple
+from game import Game
+from card import Card
+from paraminput import ParamInputMixin
 
 
-class Board:
+class Board(ParamInputMixin):
     """
     Represents the game board.
 
@@ -43,12 +44,12 @@ class Board:
         Card.KING: "👑",
     }
 
-    KEY_ACTIONS = {113: ("Q", quit), 81: ("Q", quit)}
+    KEY_ACTIONS = {113: ("Q", lambda: sys.exit()), 81: ("Q", lambda: sys.exit())}
 
     def __init__(
         self,
         stdscr: Optional[curses.window] = None,
-        parent: Optional[Self] = None,
+        parent: Optional["Board"] = None,
     ):
         """
         Initializes a Board object.
@@ -180,33 +181,22 @@ class Board:
         """
         self.screen.addstr(self.y_pos + y, self.x_pos + x, s)
 
-    def get_game_params(self) -> Tuple[int, int, list[str]]:
-        """
-        Prompts the user to select the game players and length.
-
-        Returns:
-            int: The selected players
-            int: The selected game length.
-            list[str]: The entered players' names.
-        """
-        # TODO: Setear valores por defecto
-        # Issue URL: https://github.com/pablosambuco/carreras/issues/11
-        #  Modificar los parámetros para establecwr un valor por defecto (jugadores = 2, largo = 7, player 1, 2, 3, 4)
-        #  labels: enhancement
-        #  assignees: pablosambuco
+    def ask_player_count(self) -> int:
         self.message("Presiona Q en cualquier momento para salir del juego")
         self.message("Presiona 2, 3 o 4 para definir la cantidad de jugadores: ")
-        players = self.read_key(Board.PLAYER_VALUES)
+        return self.read_key(Board.PLAYER_VALUES)
+
+    def ask_player_names(self, count: int) -> list[str]:
         players_names = []
-        for i in range(players):
+        for i in range(count):
             self.message(f"Ingresa el nombre para el jugador {i+1}: ")
             player_name = self.read_string()
             players_names.append(player_name)
+        return players_names
+
+    def ask_race_length(self) -> int:
         self.message("Presiona 4, 5, 6 o 7 para definir el largo de la carrera: ")
-        length = self.read_key(Board.LENGTH_VALUES)
-        self.message("Presiona cualquier tecla comenzar.")
-        self.read_key()
-        return players, length, players_names
+        return self.read_key(Board.LENGTH_VALUES)
 
     def ask_restart(self) -> Tuple[bool, bool]:
         """
@@ -235,7 +225,7 @@ class Board:
         y: Optional[int] = None,
         x: Optional[int] = None,
         color_pair: Optional[int] = 0,
-    ) -> Self:
+    ) -> "Board":
         """
         Draws a box on the board.
 
@@ -270,7 +260,7 @@ class Board:
         y: int,
         value: int,
         suit: Optional[str] = None,
-    ) -> Self:
+    ) -> "Board":
         """
         Draws a card on the board.
 

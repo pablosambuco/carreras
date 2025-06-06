@@ -1,6 +1,10 @@
 """Main"""
 
+import sys
+import argparse
+
 from .board import Board
+from .graphicboard import GraphicBoard
 from .game import Game
 
 
@@ -16,8 +20,16 @@ def iniciar_juego(
 
 
 def main():
+    parser = argparse.ArgumentParser(description="CARRERAS - Horse Racing Game")
+    parser.add_argument('--gui', action='store_true', help='Usar interfaz gráfica (pygame) en vez de curses')
+    args = parser.parse_args()
+
+    if args.gui:
+        board = GraphicBoard()
+    else:
+        board = Board()
+
     restart = True
-    board = Board()
     players, length, players_names = board.get_game_params()
     while restart:
         game = iniciar_juego(board, players, length, players_names)

@@ -1,5 +1,5 @@
-from src.game import Game
-from src.deck import Deck
+from game import Game
+from deck import Deck
 
 def test_game_initialization():
     game = Game(3,5,["Mock1","Mock2","Mock3"])

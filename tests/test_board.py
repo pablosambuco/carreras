@@ -1,4 +1,4 @@
-from src.board import Board
+from board import Board
 import curses
 import pytest
 from unittest.mock import Mock
@@ -9,7 +9,7 @@ def mock_screen():
     screen = Mock()
     screen.getch = Mock(return_value=ord("q"))  # Simulate a keypress
     screen.getmaxyx = Mock(return_value=(20, 20))
-    screen.getstr = Mock(return_value=("Mocky Mock"))
+    screen.getstr = Mock(return_value=b"Mocky Mock")  # Return bytes, not str
     return screen
 
 
