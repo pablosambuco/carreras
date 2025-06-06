@@ -1,8 +1,5 @@
 """Card"""
 
-from typing import Self
-
-
 class Card:
     """
     Represents a single card in a deck.
