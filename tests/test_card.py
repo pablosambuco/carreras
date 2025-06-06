@@ -1,4 +1,4 @@
-from card import Card
+from carreras.card import Card
 
 def test_card_initialization():
     card = Card("golds", 10)

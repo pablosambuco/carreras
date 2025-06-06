@@ -1,5 +1,5 @@
-from deck import Deck
-from card import Card
+from carreras.deck import Deck
+from carreras.card import Card
 
 def test_deck_initialization():
     suits = ["golds", "cups"]
