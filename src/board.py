@@ -3,12 +3,13 @@
 import sys
 import curses
 from time import sleep
-from typing import Optional, Self, Tuple
-from .game import Game
-from .card import Card
+from typing import Optional, Tuple
+from game import Game
+from card import Card
+from paraminput import ParamInputMixin
 
 
-class Board:
+class Board(ParamInputMixin):
     """
     Represents the game board.
 
@@ -43,12 +44,16 @@ class Board:
         Card.KING: "👑",
     }
 
-    KEY_ACTIONS = {113: ("Q", quit), 81: ("Q", quit)}
+    KEY_ACTIONS = {
+        113: ("Q", sys.exit),  # q
+        81: ("Q", sys.exit),   # Q
+        27: ("ESC", sys.exit), # ESC
+    }
 
     def __init__(
         self,
         stdscr: Optional[curses.window] = None,
-        parent: Optional[Self] = None,
+        parent: Optional["Board"] = None,
     ):
         """
         Initializes a Board object.
@@ -110,25 +115,28 @@ class Board:
         Returns:
             The value corresponding to the key pressed.
         """
-
-        # TODO: Mejorar interaccion de teclado
-        # Issue URL: https://github.com/pablosambuco/carreras/issues/15
-        # Issue URL: https://github.com/pablosambuco/carreras/issues/15
-        #  Se debería generar un diccionario de valor de teclas y acciones a realizar o bien un metodo donde se concentre todo el tratamiento del input
-        #  asignees: pablosambuco
-        #  label: enhancement
-
         while True:
             key = self.screen.getch()
             while key == -1:
                 key = self.screen.getch()
                 sleep(0.1)
+            # Make key handling case-insensitive for letters
+            if 65 <= key <= 90:  # Uppercase A-Z
+                key_lower = key + 32
+            else:
+                key_lower = key
             if key in Board.KEY_ACTIONS:
                 Board.KEY_ACTIONS[key][1]()
+            if key_lower in Board.KEY_ACTIONS:
+                Board.KEY_ACTIONS[key_lower][1]()
             if not return_list:
                 return
             if key in return_list:
                 return return_list[key]
+            if key_lower in return_list:
+                return return_list[key_lower]
+            # Show error message for invalid key
+            self.message("Tecla inválida. Intenta de nuevo.", curses.A_BOLD)
 
     def read_string(self) -> str:
         """
@@ -180,33 +188,33 @@ class Board:
         """
         self.screen.addstr(self.y_pos + y, self.x_pos + x, s)
 
-    def get_game_params(self) -> Tuple[int, int, list[str]]:
-        """
-        Prompts the user to select the game players and length.
-
-        Returns:
-            int: The selected players
-            int: The selected game length.
-            list[str]: The entered players' names.
-        """
-        # TODO: Setear valores por defecto
-        # Issue URL: https://github.com/pablosambuco/carreras/issues/11
-        #  Modificar los parámetros para establecwr un valor por defecto (jugadores = 2, largo = 7, player 1, 2, 3, 4)
-        #  labels: enhancement
-        #  assignees: pablosambuco
+    def ask_player_count(self) -> int:
         self.message("Presiona Q en cualquier momento para salir del juego")
         self.message("Presiona 2, 3 o 4 para definir la cantidad de jugadores: ")
-        players = self.read_key(Board.PLAYER_VALUES)
+        return self.read_key(Board.PLAYER_VALUES)
+
+    def ask_player_names(self, count: int) -> list[str]:
+        """
+        Prompts the user to enter unique, non-empty player names.
+        """
         players_names = []
-        for i in range(players):
-            self.message(f"Ingresa el nombre para el jugador {i+1}: ")
-            player_name = self.read_string()
-            players_names.append(player_name)
+        for i in range(count):
+            while True:
+                self.message(f"Ingresa el nombre para el jugador {i+1}: ")
+                player_name = self.read_string().strip()
+                if not player_name:
+                    self.message("El nombre no puede estar vacío.", curses.A_BOLD)
+                    continue
+                if player_name in players_names:
+                    self.message("El nombre ya fue usado. Elige otro.", curses.A_BOLD)
+                    continue
+                players_names.append(player_name)
+                break
+        return players_names
+
+    def ask_race_length(self) -> int:
         self.message("Presiona 4, 5, 6 o 7 para definir el largo de la carrera: ")
-        length = self.read_key(Board.LENGTH_VALUES)
-        self.message("Presiona cualquier tecla comenzar.")
-        self.read_key()
-        return players, length, players_names
+        return self.read_key(Board.LENGTH_VALUES)
 
     def ask_restart(self) -> Tuple[bool, bool]:
         """
@@ -235,7 +243,7 @@ class Board:
         y: Optional[int] = None,
         x: Optional[int] = None,
         color_pair: Optional[int] = 0,
-    ) -> Self:
+    ) -> "Board":
         """
         Draws a box on the board.
 
@@ -270,7 +278,7 @@ class Board:
         y: int,
         value: int,
         suit: Optional[str] = None,
-    ) -> Self:
+    ) -> "Board":
         """
         Draws a card on the board.
 
@@ -295,11 +303,11 @@ class Board:
         if suit:
             value = Board.FIGURES.get(value, value)
             card.message(
-                f"{value}{Board.SUITS[suit]['symbol']}",
+                f'{value}{Board.SUITS[suit]["symbol"]}',
                 curses.color_pair(Board.SUITS[suit]["color"]),
             )
         else:
-            card.message(f"{value}", curses.color_pair(5))
+            card.message(f'{value}', curses.color_pair(5))
         card.refresh()
         return card
 
@@ -319,7 +327,7 @@ class Board:
             1,
             1,
         )
-        title.message(f"{'CARRERAS':^{Board.CARD_WIDTH*2-2}}")
+        title.message(f'{"CARRERAS":^{Board.CARD_WIDTH*2-2}}')
         players = lateral.draw_box(
             (game.players + 2),
             2 * (Board.CARD_WIDTH + 1) - 2,
@@ -372,7 +380,7 @@ class Board:
             Board.CARD_WIDTH + 1,
             4,
         )
-        finish.message(f"{'FINISH':^{Board.CARD_WIDTH*(game.players)-2}}")
+        finish.message(f'{"FINISH":^{Board.CARD_WIDTH*(game.players)-2}}')
 
         if game.top_card is None:
             body.draw_card(0, 0, "░░░░")

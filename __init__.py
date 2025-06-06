@@ -1,2 +1,2 @@
-from .src import Card, Deck, Game, Board
+# Elimina el import de .src para evitar errores de importación
 

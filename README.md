@@ -1,27 +1,38 @@
 # Horse Racing Game
 
-A terminal-based horse racing game written in Python using the `curses` library. The game involves moving horses based on card draws from a shuffled deck.
+A horse racing game written in Python. You can play it in the terminal (curses) or with a graphical interface (pygame).
 
 ## Features
 
-- Terminal-based UI with color support
+- Terminal-based UI with color support (curses)
+- Graphical UI with pygame (`--gui`)
 - Interactive game with user inputs
 - Customizable game length
 - Horse movements based on card draws
+- Automated tests with pytest
 
 ## Installation
 
-To run this game, make sure you have Python 3.11 installed on your machine. You can install the required dependencies using `pip` and the `requirements.txt` file.
+Requires Python 3.10 or newer.
+
+Install dependencies:
 
 ```bash
 pip install -r requirements.txt
 ```
 
-## Usage 
-Ensure you have set up the environment with the necessary dependencies. Refer to the [Installation](#installation) section for instructions on how to install the required packages.
-To start the game, run the `carreras.py` file. 
-```bash 
+## Usage
+
+### Terminal (curses) interface
+
+```bash
 python -m src.main
+```
+
+### Graphical (pygame) interface
+
+```bash
+python -m src.main --gui
 ```
 
 ## Game Rules
@@ -45,9 +56,21 @@ Represents the deck of cards, with functionality to shuffle and draw cards.
 
 Handles the display and user interaction using the `curses` library.
 
+### GraphicBoard Class
+
+Handles the display and user interaction using the `pygame` library.
+
 ### Game Class
 
 Manages the game logic, including initializing the game and moving horses.
+
+## Testing
+
+Run all tests with:
+
+```bash
+pytest
+```
 
 ## Contributing
 
@@ -60,7 +83,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 ## Acknowledgements
 
 - Inspired by classic card games and the need for interactive terminal-based games.
-- Developed with the help of the Python `curses` library for terminal handling.
+- Developed with the help of the Python `curses` and `pygame` libraries for UI handling.
 
 ## Contact
 

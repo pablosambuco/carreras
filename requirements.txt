@@ -1,5 +1,18 @@
-# For Windows systems
-windows-curses
+# requirements.txt for carreras
+# Requires Python 3.10 or newer
 
-# Specify Python version compatibility
-python_version >= '3.11'
+# Pygame for graphical interface
+pygame
+
+# Curses for terminal interface
+# On Windows, install windows-curses
+windows-curses; platform_system == 'Windows'
+# On Linux and macOS, curses is included with Python standard library
+# No need to install separately on those systems
+
+# For running tests
+pytest
+
+# For static type checking and linting (optional, recommended for development)
+mypy
+ruff

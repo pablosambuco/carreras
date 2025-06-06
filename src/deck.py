@@ -2,7 +2,7 @@
 
 from random import shuffle
 from typing import List, Optional
-from .card import Card
+from card import Card
 
 
 class Deck:

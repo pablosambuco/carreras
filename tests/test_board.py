@@ -1,4 +1,4 @@
-from src.board import Board
+from board import Board
 import curses
 import pytest
 from unittest.mock import Mock
@@ -9,7 +9,7 @@ def mock_screen():
     screen = Mock()
     screen.getch = Mock(return_value=ord("q"))  # Simulate a keypress
     screen.getmaxyx = Mock(return_value=(20, 20))
-    screen.getstr = Mock(return_value=("Mocky Mock"))
+    screen.getstr = Mock(return_value=b"Mocky Mock")  # Return bytes, not str
     return screen
 
 
@@ -42,6 +42,8 @@ def test_board_message(mock_screen):
 
 def test_board_get_game_length(mock_screen):
     mock_screen.getch = Mock(return_value=52)  # Simulate '4' key
+    # Simulate unique names for each player
+    mock_screen.getstr = Mock(side_effect=[b"A", b"B", b"C", b"D"])
     board = Board(mock_screen)
     players, length, players_names = board.get_game_params()
-    assert players == 4 and length == 4 and players_names == ["Mocky Mock"] * 4
+    assert players == 4 and length == 4 and players_names == ["A", "B", "C", "D"]
