@@ -1,5 +1,5 @@
-from game import Game
-from deck import Deck
+from carreras.game import Game
+from carreras.deck import Deck
 
 def test_game_initialization():
     game = Game(3,5,["Mock1","Mock2","Mock3"])

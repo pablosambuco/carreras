@@ -2,7 +2,7 @@ import pytest
 import sys
 import os
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../src')))
-from paraminput import ParamInputMixin
+from carreras.paraminput import ParamInputMixin
 
 class DummyParamInput(ParamInputMixin):
     def __init__(self, player_count=2, player_names=None, race_length=4):

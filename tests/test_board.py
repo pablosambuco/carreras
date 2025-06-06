@@ -1,5 +1,4 @@
-from board import Board
-import curses
+from carreras.board import Board
 import pytest
 from unittest.mock import Mock
 
