@@ -69,6 +69,36 @@ class GraphicBoard(ParamInputMixin):
         self.clock = pygame.time.Clock()
         self.running = True
 
+        # Cargar imágenes de cartas y dorso
+        self.card_images = self._load_card_images()
+        self.back_image = self._load_back_image()
+
+    def _load_card_images(self):
+        """Carga todas las imágenes de cartas disponibles en un diccionario."""
+        card_images = {}
+        suits = ["coins", "cups", "swords", "clubs"]
+        ranks = range(1, 13)
+        for suit in suits:
+            for rank in ranks:
+                path = f"src/carreras/img/{suit}/{rank}.jpg"
+                try:
+                    image = pygame.image.load(path)
+                    image = pygame.transform.scale(image, (self.CARD_WIDTH, self.CARD_HEIGHT))
+                    card_images[(suit, rank)] = image
+                except Exception:
+                    pass  # Si no existe la imagen, se maneja en _draw_card
+        return card_images
+
+    def _load_back_image(self):
+        """Carga la imagen de dorso de carta (back.jpg)."""
+        try:
+            path = "src/carreras/img/back.jpg"
+            image = pygame.image.load(path)
+            image = pygame.transform.scale(image, (self.CARD_WIDTH, self.CARD_HEIGHT))
+            return image
+        except Exception:
+            return None
+
     def ask_player_count(self) -> int:
         """Ask for the number of players (2-4)."""
         while self.running:
@@ -265,41 +295,37 @@ class GraphicBoard(ParamInputMixin):
             self._draw_text("No Card", self.font_medium, self.white, 50, 270)
 
     def _draw_card(self, x: int, y: int, value, suit: Optional[str]):
-        """Draw a single card."""
-        # Card background
-        card_rect = pygame.Rect(x, y, self.CARD_WIDTH, self.CARD_HEIGHT)
-        pygame.draw.rect(self.screen, self.white, card_rect)
-        pygame.draw.rect(self.screen, self.black, card_rect, 2)
-
-        # Card content
-        if suit:
-            color = self.SUIT_COLORS[suit]
-            if value in self.FIGURES:
-                display_value = self.FIGURES[value]
+        """Dibuja una carta: imagen, dorso o cuadro blanco si no existe."""
+        rect = pygame.Rect(x, y, self.CARD_WIDTH, self.CARD_HEIGHT)
+        if suit is None or value == "?":
+            # Carta oculta: mostrar dorso si existe, si no, cuadro blanco
+            if self.back_image:
+                self.screen.blit(self.back_image, (x, y))
             else:
-                display_value = str(value)
-
-            # Draw value
-            text_surface = self.font_medium.render(display_value, True, color)
-            text_rect = text_surface.get_rect(
-                center=(x + self.CARD_WIDTH // 2, y + self.CARD_HEIGHT // 2 - 10)
-            )
-            self.screen.blit(text_surface, text_rect)
-
-            # Draw suit symbol (simplified)
-            suit_text = self.SUITS[suit]["symbol"]
-            suit_surface = self.font_small.render(suit_text, True, color)
-            suit_rect = suit_surface.get_rect(
-                center=(x + self.CARD_WIDTH // 2, y + self.CARD_HEIGHT // 2 + 15)
-            )
-            self.screen.blit(suit_surface, suit_rect)
+                pygame.draw.rect(self.screen, self.white, rect)
+                pygame.draw.rect(self.screen, self.black, rect, 2)
         else:
-            # Hidden card
-            text_surface = self.font_medium.render(str(value), True, self.gray)
-            text_rect = text_surface.get_rect(
-                center=(x + self.CARD_WIDTH // 2, y + self.CARD_HEIGHT // 2)
-            )
-            self.screen.blit(text_surface, text_rect)
+            img = self.card_images.get((suit, value))
+            if img:
+                self.screen.blit(img, (x, y))
+            else:
+                # Si no hay imagen, cuadro blanco con borde
+                pygame.draw.rect(self.screen, self.white, rect)
+                pygame.draw.rect(self.screen, self.black, rect, 2)
+                # Además, mostrar valor y símbolo
+                color = self.SUIT_COLORS[suit]
+                display_value = self.FIGURES.get(value, str(value))
+                text_surface = self.font_medium.render(str(display_value), True, color)
+                text_rect = text_surface.get_rect(
+                    center=(x + self.CARD_WIDTH // 2, y + self.CARD_HEIGHT // 2 - 10)
+                )
+                self.screen.blit(text_surface, text_rect)
+                suit_text = self.SUITS[suit]["symbol"]
+                suit_surface = self.font_small.render(suit_text, True, color)
+                suit_rect = suit_surface.get_rect(
+                    center=(x + self.CARD_WIDTH // 2, y + self.CARD_HEIGHT // 2 + 15)
+                )
+                self.screen.blit(suit_surface, suit_rect)
 
     def _draw_text(
         self, text: str, font: pygame.font.Font, color: tuple, x: int, y: int
