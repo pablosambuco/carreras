@@ -2,6 +2,7 @@
 
 from typing import List
 from carreras.deck import Deck
+from .i18n import tr
 
 
 class Game:
@@ -64,7 +65,9 @@ class Game:
         """
         Prints the current status of the game.
         """
+        print(tr("Knights status:"))
         print(self.knights)
+        print(tr("Steps status:"))
         print(self.steps)
 
     def move_knights(self, suit: str, step: int):
