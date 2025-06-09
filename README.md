@@ -26,13 +26,28 @@ pip install -r requirements.txt
 ### Terminal (curses) interface
 
 ```bash
-python -m src.main
+python -m src.carreras.main
 ```
 
 ### Graphical (pygame) interface
 
 ```bash
-python -m src.main --gui
+python -m src.carreras.main --gui
+```
+
+### Language selection
+
+You can select the language (Spanish or English) with the `--lang` parameter:
+
+```bash
+python -m src.carreras.main --lang es   # Spanish (default)
+python -m src.carreras.main --lang en   # English
+```
+
+You can combine with `--gui`:
+
+```bash
+python -m src.carreras.main --gui --lang en
 ```
 
 ## Game Rules
