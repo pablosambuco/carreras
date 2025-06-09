@@ -2,6 +2,7 @@
 
 import pygame
 import sys
+import os
 from typing import Optional, Tuple
 from .game import Game
 from .card import Card
@@ -69,6 +70,8 @@ class GraphicBoard(ParamInputMixin):
         self.clock = pygame.time.Clock()
         self.running = True
 
+        self.base_img_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "img")
+
         # Cargar imágenes de cartas y dorso
         self.card_images = self._load_card_images()
         self.back_image = self._load_back_image()
@@ -80,7 +83,7 @@ class GraphicBoard(ParamInputMixin):
         ranks = range(1, 13)
         for suit in suits:
             for rank in ranks:
-                path = f"src/carreras/img/{suit}/{rank}.jpg"
+                path = os.path.join(self.base_img_path, suit, f"{rank}.jpg")
                 try:
                     image = pygame.image.load(path)
                     image = pygame.transform.scale(image, (self.CARD_WIDTH, self.CARD_HEIGHT))
@@ -92,7 +95,7 @@ class GraphicBoard(ParamInputMixin):
     def _load_back_image(self):
         """Carga la imagen de dorso de carta (back.jpg)."""
         try:
-            path = "src/carreras/img/back.jpg"
+            path = os.path.join(self.base_img_path, "back.jpg")
             image = pygame.image.load(path)
             image = pygame.transform.scale(image, (self.CARD_WIDTH, self.CARD_HEIGHT))
             return image
@@ -255,6 +258,18 @@ class GraphicBoard(ParamInputMixin):
         """Draw the race track with knights and steps."""
         track_start_x = 300
         track_start_y = 100
+
+        # Encabezado: nombre de cada jugador sobre su fila
+        for knight_num, knight in game.knights.items():
+            y = track_start_y + knight_num * self.CARD_HEIGHT
+            player_name = knight["player"]
+            self._draw_text(
+                player_name,
+                self.font_small,
+                self.white,
+                track_start_x - 90,  # a la izquierda de la pista
+                y + self.CARD_HEIGHT // 2 - 10
+            )
 
         # Draw finish line
         finish_x = track_start_x + (game.length + 1) * self.CARD_WIDTH
