@@ -70,7 +70,9 @@ class GraphicBoard(ParamInputMixin):
         self.clock = pygame.time.Clock()
         self.running = True
 
-        self.base_img_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "img")
+        self.base_img_path = os.path.join(
+            os.path.dirname(os.path.abspath(__file__)), "img"
+        )
 
         # Cargar imágenes de cartas y dorso
         self.card_images = self._load_card_images()
@@ -86,7 +88,9 @@ class GraphicBoard(ParamInputMixin):
                 path = os.path.join(self.base_img_path, suit, f"{rank}.jpg")
                 try:
                     image = pygame.image.load(path)
-                    image = pygame.transform.scale(image, (self.CARD_WIDTH, self.CARD_HEIGHT))
+                    image = pygame.transform.scale(
+                        image, (self.CARD_WIDTH, self.CARD_HEIGHT)
+                    )
                     card_images[(suit, rank)] = image
                 except Exception:
                     pass  # Si no existe la imagen, se maneja en _draw_card
@@ -269,7 +273,7 @@ class GraphicBoard(ParamInputMixin):
                 self.font_small,
                 self.white,
                 track_start_x - 90,
-                y + self.CARD_HEIGHT // 2 - 10
+                y + self.CARD_HEIGHT // 2 - 10,
             )
 
         # Draw finish line
@@ -289,8 +293,12 @@ class GraphicBoard(ParamInputMixin):
         for step_num, step in game.steps.items():
             x = track_start_x + step_num * self.CARD_WIDTH
             y = track_start_y - self.CARD_HEIGHT + 10  # Menos separación
-            self._draw_card(x, y, "?" if step["hidden"] else step["card"].value,
-                            None if step["hidden"] else step["card"].suit)
+            self._draw_card(
+                x,
+                y,
+                "?" if step["hidden"] else step["card"].value,
+                None if step["hidden"] else step["card"].suit,
+            )
 
         # Draw knights
         for knight_num, knight in game.knights.items():

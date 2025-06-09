@@ -38,7 +38,7 @@ python -m src.main --gui
 ## Game Rules
 
 1. The game begins by asking the user to select the number of players, their names and the length of the race.
-2. Each horse is represented by a suit (`coins`, `cups`, `swords`, `clubs`).
+2. Each horse is represented by a suit (`golds`, `cups`, `swords`, `clubs`).
 3. Horses move forward or backward based on the drawn card's suit.
 4. The game ends when a horse crosses the finish line.
 
