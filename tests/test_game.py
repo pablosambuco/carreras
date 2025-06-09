@@ -12,7 +12,7 @@ def test_game_initialization():
 def test_game_move_knights():
     game = Game(5)
     initial_rows = [knight["row"] for knight in game.knights.values()]
-    game.move_knights("golds", 1)
+    game.move_knights("coins", 1)
     updated_rows = [knight["row"] for knight in game.knights.values()]
     assert updated_rows != initial_rows
 

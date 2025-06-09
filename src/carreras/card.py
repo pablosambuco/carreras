@@ -4,7 +4,7 @@ class Card:
     """
     Represents a single card in a deck.
     Attributes:
-        suit (str): The suit of the card (e.g., 'golds', 'cups').
+        suit (str): The suit of the card (e.g., 'coins', 'cups').
         value (int): The value of the card (1-12).
     """
 
