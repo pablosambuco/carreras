@@ -32,7 +32,7 @@ class Board(ParamInputMixin):
     YES_NO_VALUES = {115: 1, 110: 0, 83: 1, 78: 0}
 
     SUITS = {
-        "golds": {"symbol": "🪙", "color": 1},
+        "coins": {"symbol": "🪙", "color": 1},
         "cups": {"symbol": "🍷", "color": 2},
         "swords": {"symbol": "⚔", "color": 3},
         "clubs": {"symbol": "🌳", "color": 4},

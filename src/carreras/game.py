@@ -29,7 +29,7 @@ class Game:
             board (Board): The game board.
         """
         self.deck = Deck(
-            ["golds", "cups", "swords", "clubs"][:players],
+            ["coins", "cups", "swords", "clubs"][:players],
             12,
             shuffled=True,
         )
