@@ -63,7 +63,17 @@ def main():
         action="store_true",
         help="Usar interfaz gráfica (pygame) en vez de curses",
     )
+    parser.add_argument(
+        "--lang",
+        choices=["es", "en"],
+        default="es",
+        help="Idioma del juego: es (Español, por defecto) o en (English)",
+    )
     args = parser.parse_args()
+
+    from carreras.i18n import set_language
+
+    set_language(args.lang)
 
     if args.gui:
         if HAS_PYGAME:
