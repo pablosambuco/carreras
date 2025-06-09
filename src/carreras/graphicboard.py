@@ -256,8 +256,9 @@ class GraphicBoard(ParamInputMixin):
 
     def _draw_race_track(self, game: Game):
         """Draw the race track with knights and steps."""
+        # Reducir el espacio vertical entre cartas de paso y filas de jugadores
         track_start_x = 300
-        track_start_y = 100
+        track_start_y = 100 + self.CARD_HEIGHT // 2  # Menos espacio arriba
 
         # Encabezado: nombre de cada jugador sobre su fila
         for knight_num, knight in game.knights.items():
@@ -267,7 +268,7 @@ class GraphicBoard(ParamInputMixin):
                 player_name,
                 self.font_small,
                 self.white,
-                track_start_x - 90,  # a la izquierda de la pista
+                track_start_x - 90,
                 y + self.CARD_HEIGHT // 2 - 10
             )
 
@@ -284,15 +285,12 @@ class GraphicBoard(ParamInputMixin):
             "FINISH", self.font_medium, self.white, finish_x + 10, track_start_y
         )
 
-        # Draw step cards
+        # Draw step cards (ahora más cerca de la pista)
         for step_num, step in game.steps.items():
             x = track_start_x + step_num * self.CARD_WIDTH
-            y = track_start_y - self.CARD_HEIGHT - 10
-
-            if step["hidden"]:
-                self._draw_card(x, y, "?", None)
-            else:
-                self._draw_card(x, y, step["card"].value, step["card"].suit)
+            y = track_start_y - self.CARD_HEIGHT + 10  # Menos separación
+            self._draw_card(x, y, "?" if step["hidden"] else step["card"].value,
+                            None if step["hidden"] else step["card"].suit)
 
         # Draw knights
         for knight_num, knight in game.knights.items():
