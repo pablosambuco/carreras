@@ -69,7 +69,9 @@ def main():
         if HAS_PYGAME:
             board = GraphicBoard()
         else:
-            print("Pygame no está instalado. Usando interfaz de texto (curses) en su lugar.")
+            print(
+                "Pygame no está instalado. Usando interfaz de texto (curses) en su lugar."
+            )
             board = Board()
     else:
         board = Board()
