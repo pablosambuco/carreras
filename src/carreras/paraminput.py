@@ -1,5 +1,7 @@
 """Parameter input mixin for board classes (curses/pygame)."""
 
+from .i18n import tr
+
 class ParamInputMixin:
     """Mixin para entrada de parámetros del juego (jugadores, nombres, largo)."""
     def ask_player_count(self) -> int:

@@ -7,6 +7,7 @@ from typing import Optional, Tuple
 from carreras.game import Game
 from carreras.card import Card
 from carreras.paraminput import ParamInputMixin
+from carreras.i18n import tr, get_language
 
 
 class Board(ParamInputMixin):
@@ -29,13 +30,14 @@ class Board(ParamInputMixin):
 
     LENGTH_VALUES = {52: 4, 53: 5, 54: 6, 55: 7}
     PLAYER_VALUES = {50: 2, 51: 3, 52: 4}
-    YES_NO_VALUES = {115: 1, 110: 0, 83: 1, 78: 0}
+    # YES_NO_VALUES will be set in __init__ based on language
+    YES_NO_VALUES = None
 
     SUITS = {
-        "coins": {"symbol": "🪙", "color": 1},
-        "cups": {"symbol": "🍷", "color": 2},
-        "swords": {"symbol": "⚔", "color": 3},
-        "clubs": {"symbol": "🌳", "color": 4},
+        "coins": {"symbol":  "🪙", "color": 1, "name": tr("coins")},
+        "cups": {"symbol":   "🍷", "color": 2, "name": tr("cups")},
+        "swords": {"symbol": "⚔", "color": 3, "name": tr("swords")},
+        "clubs": {"symbol":  "🌳", "color": 4, "name": tr("clubs")},
     }
 
     FIGURES = {
@@ -46,8 +48,8 @@ class Board(ParamInputMixin):
 
     KEY_ACTIONS = {
         113: ("Q", sys.exit),  # q
-        81: ("Q", sys.exit),   # Q
-        27: ("ESC", sys.exit), # ESC
+        81: ("Q", sys.exit),  # Q
+        27: ("ESC", sys.exit),  # ESC
     }
 
     def __init__(
@@ -79,6 +81,12 @@ class Board(ParamInputMixin):
 
         self.x_pos = 0
         self.y_pos = 0
+
+        lang = get_language()
+        if lang == "en":
+            self.YES_NO_VALUES = {121: 1, 110: 0, 89: 1, 78: 0}  # y/n/Y/N
+        else:
+            self.YES_NO_VALUES = {115: 1, 110: 0, 83: 1, 78: 0}  # s/n/S/N
 
     def set_pos(self, y, x):
         """
@@ -136,7 +144,7 @@ class Board(ParamInputMixin):
             if key_lower in return_list:
                 return return_list[key_lower]
             # Show error message for invalid key
-            self.message("Tecla inválida. Intenta de nuevo.", curses.A_BOLD)
+            self.message(tr("Invalid key. Try again."), curses.A_BOLD)
 
     def read_string(self) -> str:
         """
@@ -189,8 +197,8 @@ class Board(ParamInputMixin):
         self.screen.addstr(self.y_pos + y, self.x_pos + x, s)
 
     def ask_player_count(self) -> int:
-        self.message("Presiona Q en cualquier momento para salir del juego")
-        self.message("Presiona 2, 3 o 4 para definir la cantidad de jugadores: ")
+        self.message(tr("Press Q to quit"))
+        self.message(tr("Press 2, 3, or 4 to select number of players:"))
         return self.read_key(Board.PLAYER_VALUES)
 
     def ask_player_names(self, count: int) -> list[str]:
@@ -200,20 +208,23 @@ class Board(ParamInputMixin):
         players_names = []
         for i in range(count):
             while True:
-                self.message(f"Ingresa el nombre para el jugador {i+1}: ")
+                self.message(tr("Enter name for player {num}:", num=i + 1))
                 player_name = self.read_string().strip()
                 if not player_name:
-                    self.message("El nombre no puede estar vacío.", curses.A_BOLD)
+                    self.message(tr("The name cannot be empty."), curses.A_BOLD)
                     continue
                 if player_name in players_names:
-                    self.message("El nombre ya fue usado. Elige otro.", curses.A_BOLD)
+                    self.message(
+                        tr("The name has already been used. Choose another."),
+                        curses.A_BOLD,
+                    )
                     continue
                 players_names.append(player_name)
                 break
         return players_names
 
     def ask_race_length(self) -> int:
-        self.message("Presiona 4, 5, 6 o 7 para definir el largo de la carrera: ")
+        self.message(tr("Press 4, 5, 6, or 7 to select race length:"))
         return self.read_key(Board.LENGTH_VALUES)
 
     def ask_restart(self) -> Tuple[bool, bool]:
@@ -225,13 +236,20 @@ class Board(ParamInputMixin):
             bool: If will restart, if it will be with the same parameters
         """
         self.clear()
-        self.message("Queres reiniciar el juego? S: Si / N: No")
-        restart = self.read_key(Board.YES_NO_VALUES)
+        lang = get_language()
+        if lang == "en":
+            self.message(tr("Restart game? (Y/N)"))
+            restart = self.read_key(self.YES_NO_VALUES)
+        else:
+            self.message(tr("Restart game? (S/N)"))
+            restart = self.read_key(self.YES_NO_VALUES)
         if not restart:
             return False, False
-
-        self.message("Mismos jugadores y largo? S: Si / N: No")
-        same_params = self.read_key(Board.YES_NO_VALUES)
+        if lang == "en":
+            self.message(tr("Same players and length? (Y/N)"))
+        else:
+            self.message(tr("Same players and length? (S/N)"))
+        same_params = self.read_key(self.YES_NO_VALUES)
         if same_params:
             return True, True
         return True, False
@@ -307,7 +325,7 @@ class Board(ParamInputMixin):
                 curses.color_pair(Board.SUITS[suit]["color"]),
             )
         else:
-            card.message(f'{value}', curses.color_pair(5))
+            card.message(f"{value}", curses.color_pair(5))
         card.refresh()
         return card
 
@@ -327,7 +345,7 @@ class Board(ParamInputMixin):
             1,
             1,
         )
-        title.message(f'{"CARRERAS":^{Board.CARD_WIDTH*2-2}}')
+        title.message(f'{tr("CARRERAS"):^{Board.CARD_WIDTH*2-2}}')
         players = lateral.draw_box(
             (game.players + 2),
             2 * (Board.CARD_WIDTH + 1) - 2,
@@ -364,7 +382,7 @@ class Board(ParamInputMixin):
             color_pair=4,
         )
         menu.set_pos((game.length + 1) * Board.CARD_HEIGHT - (game.players + 4), 2)
-        menu.message("Q: Salir")
+        menu.message(tr("Q: Exit"))
         body = self.draw_box(
             (game.length + 2) * Board.CARD_HEIGHT + 2,
             (game.players + 1) * (Board.CARD_WIDTH) + 2,
@@ -380,7 +398,7 @@ class Board(ParamInputMixin):
             Board.CARD_WIDTH + 1,
             4,
         )
-        finish.message(f'{"FINISH":^{Board.CARD_WIDTH*(game.players)-2}}')
+        finish.message(f'{tr("FINISH"):^{Board.CARD_WIDTH*(game.players)-2}}')
 
         if game.top_card is None:
             body.draw_card(0, 0, "░░░░")

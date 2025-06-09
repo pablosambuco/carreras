@@ -7,6 +7,7 @@ from typing import Optional, Tuple
 from .game import Game
 from .card import Card
 from .paraminput import ParamInputMixin
+from .i18n import tr, get_language
 
 
 class GraphicBoard(ParamInputMixin):
@@ -23,7 +24,8 @@ class GraphicBoard(ParamInputMixin):
 
     LENGTH_VALUES = {pygame.K_4: 4, pygame.K_5: 5, pygame.K_6: 6, pygame.K_7: 7}
     PLAYER_VALUES = {pygame.K_2: 2, pygame.K_3: 3, pygame.K_4: 4}
-    YES_NO_VALUES = {pygame.K_s: 1, pygame.K_n: 0}
+    # YES/NO keys will be set in __init__ based on language
+    YES_NO_VALUES = None
 
     # Colors for suits (RGB values)
     SUIT_COLORS = {
@@ -54,7 +56,7 @@ class GraphicBoard(ParamInputMixin):
         self.width = 1200
         self.height = 800
         self.screen = pygame.display.set_mode((self.width, self.height))
-        pygame.display.set_caption("CARRERAS - Horse Racing Game")
+        pygame.display.set_caption(tr("CARRERAS - Horse Racing Game"))
 
         # Fonts
         self.font_large = pygame.font.Font(None, 36)
@@ -78,10 +80,22 @@ class GraphicBoard(ParamInputMixin):
         self.card_images = self._load_card_images()
         self.back_image = self._load_back_image()
 
+        # Set YES_NO_VALUES based on language
+        lang = get_language()
+        if lang == "en":
+            self.YES_NO_VALUES = {pygame.K_y: 1, pygame.K_n: 0}
+        else:
+            self.YES_NO_VALUES = {pygame.K_s: 1, pygame.K_n: 0}
+
     def _load_card_images(self):
         """Carga todas las imágenes de cartas disponibles en un diccionario."""
         card_images = {}
-        suits = ["coins", "cups", "swords", "clubs"]
+        suits = [
+            "coins",
+            "cups",
+            "swords",
+            "clubs",
+        ]
         ranks = range(1, 13)
         for suit in suits:
             for rank in ranks:
@@ -118,9 +132,9 @@ class GraphicBoard(ParamInputMixin):
                 if event.type == pygame.KEYDOWN and event.key in self.PLAYER_VALUES:
                     return self.PLAYER_VALUES[event.key]
             self.screen.fill(self.bg_color)
-            self._draw_text("Press Q to quit", self.font_medium, self.white, 50, 50)
+            self._draw_text(tr("Press Q to quit"), self.font_medium, self.white, 50, 50)
             self._draw_text(
-                "Press 2, 3, or 4 to select number of players:",
+                tr("Press 2, 3, or 4 to select number of players:"),
                 self.font_large,
                 self.white,
                 50,
@@ -147,6 +161,9 @@ class GraphicBoard(ParamInputMixin):
                     if event.type == pygame.KEYDOWN:
                         if event.key == pygame.K_RETURN:
                             if current_name.strip():
+                                if current_name.strip() in names:
+                                    current_name = ""
+                                    break
                                 names.append(current_name.strip())
                                 current_name = ""
                                 break
@@ -157,7 +174,7 @@ class GraphicBoard(ParamInputMixin):
 
                 self.screen.fill(self.bg_color)
                 self._draw_text(
-                    f"Enter name for player {i+1}:",
+                    tr("Enter name for player {num}:", num=i + 1),
                     self.font_large,
                     self.white,
                     50,
@@ -165,12 +182,28 @@ class GraphicBoard(ParamInputMixin):
                 )
                 self._draw_text(current_name, self.font_medium, self.white, 50, 250)
                 self._draw_text(
-                    "Press Enter to confirm, Q to quit",
+                    tr("Press Enter to confirm, Q to quit"),
                     self.font_small,
                     self.gray,
                     50,
                     300,
                 )
+                if not current_name and len(names) > i:
+                    self._draw_text(
+                        tr("The name cannot be empty."),
+                        self.font_small,
+                        self.gray,
+                        50,
+                        330,
+                    )
+                elif current_name.strip() in names:
+                    self._draw_text(
+                        tr("The name has already been used. Choose another."),
+                        self.font_small,
+                        self.gray,
+                        50,
+                        330,
+                    )
                 pygame.display.flip()
                 self.clock.tick(60)
 
@@ -193,7 +226,7 @@ class GraphicBoard(ParamInputMixin):
 
             self.screen.fill(self.bg_color)
             self._draw_text(
-                "Press 4, 5, 6, or 7 to select race length:",
+                tr("Press 4, 5, 6, or 7 to select race length:"),
                 self.font_large,
                 self.white,
                 50,
@@ -209,7 +242,7 @@ class GraphicBoard(ParamInputMixin):
         self.screen.fill(self.bg_color)
 
         # Draw title
-        self._draw_text("CARRERAS", self.font_large, self.white, 50, 20)
+        self._draw_text(tr("CARRERAS"), self.font_large, self.white, 50, 20)
 
         # Draw player status
         self._draw_player_status(game)
@@ -222,7 +255,7 @@ class GraphicBoard(ParamInputMixin):
 
         # Draw instructions
         self._draw_text(
-            "Press Q to quit, any other key to continue",
+            tr("Press Q to quit, any other key to continue"),
             self.font_small,
             self.gray,
             50,
@@ -255,7 +288,9 @@ class GraphicBoard(ParamInputMixin):
 
         for i, (ranking, player, suit) in enumerate(status):
             color = self.SUIT_COLORS[suit]
-            text = f"{ranking}: {player} ({suit})"
+            # Mostrar el nombre traducido del palo junto al jugador
+            suit_name = tr(suit)
+            text = f"{ranking}: {player} ({suit_name})"
             self._draw_text(text, self.font_medium, color, 50, y_start + i * 30)
 
     def _draw_race_track(self, game: Game):
@@ -286,7 +321,7 @@ class GraphicBoard(ParamInputMixin):
             3,
         )
         self._draw_text(
-            "FINISH", self.font_medium, self.white, finish_x + 10, track_start_y
+            tr("FINISH"), self.font_medium, self.white, finish_x + 10, track_start_y
         )
 
         # Draw step cards (ahora más cerca de la pista)
@@ -310,10 +345,10 @@ class GraphicBoard(ParamInputMixin):
         """Draw the current top card."""
         if game.top_card:
             self._draw_card(50, 300, game.top_card.value, game.top_card.suit)
-            self._draw_text("Current Card:", self.font_medium, self.white, 50, 270)
+            self._draw_text(tr("Current Card:"), self.font_medium, self.white, 50, 270)
         else:
             self._draw_card(50, 300, "?", None)
-            self._draw_text("No Card", self.font_medium, self.white, 50, 270)
+            self._draw_text(tr("No Card"), self.font_medium, self.white, 50, 270)
 
     def _draw_card(self, x: int, y: int, value, suit: Optional[str]):
         """Dibuja una carta: imagen, dorso o cuadro blanco si no existe."""
@@ -370,11 +405,11 @@ class GraphicBoard(ParamInputMixin):
 
     def ask_restart(self) -> Tuple[bool, bool]:
         """Ask if user wants to restart the game."""
-        restart = self._ask_yes_no("Restart game? (S/N)")
+        restart = self._ask_yes_no(tr("Restart game? (S/N)"))
         if not restart:
             return False, False
 
-        same_params = self._ask_yes_no("Same players and length? (S/N)")
+        same_params = self._ask_yes_no(tr("Same players and length? (S/N)"))
         return True, same_params
 
     def _ask_yes_no(self, question: str) -> bool:
@@ -391,9 +426,13 @@ class GraphicBoard(ParamInputMixin):
 
             self.screen.fill(self.bg_color)
             self._draw_text(question, self.font_large, self.white, 50, 200)
-            self._draw_text(
-                "Press S for Yes, N for No", self.font_medium, self.gray, 50, 250
-            )
+            # Show correct prompt for yes/no keys
+            lang = get_language()
+            if lang == "en":
+                prompt = tr("Press Y for Yes, N for No")
+            else:
+                prompt = tr("Press S for Yes, N for No")
+            self._draw_text(prompt, self.font_medium, self.gray, 50, 250)
             pygame.display.flip()
             self.clock.tick(60)
 
