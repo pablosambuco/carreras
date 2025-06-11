@@ -40,7 +40,21 @@ TRANSLATIONS = {
         "cups": "copas",
         "swords": "espadas",
         "clubs": "bastos",        
-        # Add more as needed
+        # Interface
+        "Game Setup": "Configuración del juego",
+        "Players:": "Jugadores:",
+        "Player names:": "Nombres de los jugadores:",
+        "Race length:": "Largo de la carrera:",
+        "Continue": "Continuar",
+        "Accept": "Aceptar",
+        "Enter player names:": "Ingresa los nombres de los jugadores:",
+        "Select number of players:": "Selecciona la cantidad de jugadores:",
+        "Select race length:": "Selecciona el largo de la carrera:",
+        "Yes": "Sí",
+        "No": "No",
+        "Restart game": "¿Reiniciar juego?",
+        "Same players and length": "¿Mismos jugadores y largo?",
+        "Player": "Jugador",
     },
     "en": {
         # General
@@ -75,7 +89,21 @@ TRANSLATIONS = {
         "cups": "cups",
         "swords": "swords",
         "clubs": "clubs",        
-        # Add more as needed
+        # Interface
+        "Game Setup": "Game Setup",
+        "Players:": "Players:",
+        "Player names:": "Player names:",
+        "Race length:": "Race length:",
+        "Continue": "Continue",
+        "Accept": "Accept",
+        "Enter player names:": "Enter player names:",
+        "Select number of players:": "Select number of players:",
+        "Select race length:": "Select race length:",
+        "Yes": "Yes",
+        "No": "No",
+        "Restart game": "Restart game?",
+        "Same players and length": "Same players and length?",
+        "Player": "Player",
     },
 }
 

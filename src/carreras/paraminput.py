@@ -18,7 +18,4 @@ class ParamInputMixin:
 
     def get_game_params(self) -> tuple[int, int, list[str]]:
         """Obtiene todos los parámetros del juego: jugadores, nombres y largo."""
-        players = self.ask_player_count()
-        names = self.ask_player_names(players)
-        length = self.ask_race_length()
-        return players, length, names
+        raise NotImplementedError
