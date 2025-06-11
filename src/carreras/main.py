@@ -49,6 +49,9 @@ def run_game_loop(board: Board, game: Game) -> None:
 def handle_restart(board: Board) -> tuple[bool, int, int, list[str]]:
     """Maneja la lógica de reinicio del juego."""
     restart, same_params = board.ask_restart()
+    if restart and same_params:
+        # Reutilizar los mismos parámetros (no pedirlos de nuevo)
+        return restart, None, None, None
     if restart and not same_params:
         players, length, players_names = board.get_game_params()
         return restart, players, length, players_names
@@ -88,6 +91,8 @@ def main():
 
     restart = True
     players, length, players_names = board.get_game_params()
+    # Guardar los parámetros originales para reinicio rápido
+    orig_players, orig_length, orig_names = players, length, players_names
 
     while restart:
         if players is None:
@@ -95,7 +100,14 @@ def main():
 
         game = iniciar_juego(board, players, length, players_names)
         run_game_loop(board, game)
-        restart, players, length, players_names = handle_restart(board)
+        restart, new_players, new_length, new_names = handle_restart(board)
+        if restart:
+            if new_players is None and new_length is None and new_names is None:
+                # Reutilizar los originales
+                players, length, players_names = orig_players, orig_length, orig_names
+            else:
+                players, length, players_names = new_players, new_length, new_names
+                orig_players, orig_length, orig_names = players, length, players_names
 
     board.destroy()
 

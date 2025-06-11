@@ -21,6 +21,12 @@ class DummyParamInput(ParamInputMixin):
     def ask_race_length(self):
         """Return the preset race length."""
         return self._race_length
+    def get_game_params(self):
+        """Return all game parameters as a tuple."""
+        count = self.ask_player_count()
+        names = self.ask_player_names(count)
+        length = self.ask_race_length()
+        return count, length, names
 
 def test_paraminput_get_game_params():
     """Test get_game_params returns correct tuple of parameters."""
